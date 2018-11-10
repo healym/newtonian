@@ -27,6 +27,29 @@ namespace Joueur.cs.Games.Newtonian
             }
         }
 
+        public static void ManagerWork(Unit u)
+        {
+            if (!Rules.IsFull(u))
+            {
+                var goalType = null; // which type of oren't we need
+                var goalTiles = AI.GAME.Tiles.Where(t => Extensions.GetAmount(t, goalType) > 0).ToHashSet();
+                var path = GetPath(u.ToPoint().Singular(), (p => goalTiles.Contains(p.ToTile()))).ToArray();
+                foreach(Point step in path.Skip(1).SkipLast(1).Take(u.Moves))
+                {
+                    u.Move(step.ToTile());
+                }
+                if(Extensions.GetAmount(u.Tile, goalType) > 0)
+                {
+                    u.Pickup(u.Tile)
+                }
+
+                if (u.Acted)
+                {
+                    
+                }
+            }
+        }
+
         public static IEnumerable<Point> GetPath(IEnumerable<Point> starts, Func<Point, bool> isGoal)
         {
             return new AStar<Point>(starts, isGoal, (a, b) => 1, p => 0, p =>

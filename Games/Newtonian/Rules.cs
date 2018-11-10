@@ -42,9 +42,7 @@ namespace Joueur.cs.Games.Newtonian
 
         public static Boolean CanPickup(Unit u)
         {
-            return (u.Job == AI.PHYSICIST && (u.Redium + u.Blueium + u.BlueiumOre + u.RediumOre) < AI.PHYSICIST.CarryLimit && IsNextToResources(u))
-                || (u.Job == AI.INTERN    && (u.RediumOre + u.BlueiumOre)                        < AI.INTERN.CarryLimit    && IsNextToResources(u))
-                || (u.Job == AI.MANAGER   && (u.Redium + u.Blueium)                              < AI.MANAGER.CarryLimit   && IsNextToResources(u));
+            return !IsFull(u) && IsNextToResources(u);
         }
 
         public static Boolean IsNextToResources(Unit u)
@@ -64,6 +62,23 @@ namespace Joueur.cs.Games.Newtonian
                 }
             }
             return false;
+        }
+
+        public static Boolean IsFull(Unit u)
+        {
+            if (u.Job == AI.MANAGER)
+            {
+                return u.Blueium + u.Redium < AI.MANAGER.CarryLimit;
+            }
+            if (u.Job == AI.PHYSICIST)
+            {
+                return u.Blueium + u.BlueiumOre + u.Redium + u.RediumOre < AI.PHYSICIST.CarryLimit;
+            }
+            if (u.Job == AI.INTERN)
+            {
+                return u.BlueiumOre + u.RediumOre < AI.INTERN.CarryLimit;
+            }
+            return false; // should never happen, outside domain
         }
 
         public static Boolean CanSabotageMachine(Unit saboteur, Machine target)
