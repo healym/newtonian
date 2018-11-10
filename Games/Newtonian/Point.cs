@@ -23,9 +23,7 @@ namespace Joueur.cs.Games.Newtonian
 
         public override int GetHashCode()
         {
-            int result = x;
-            result = 31 * result + y;
-            return result;
+            return x * AI.GAME.MapWidth + y;
         }
 
         public override string ToString()

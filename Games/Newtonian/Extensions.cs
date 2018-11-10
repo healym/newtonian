@@ -84,5 +84,30 @@ namespace Joueur.cs.Games.Newtonian
                 return result;
             };
         }
+
+        public static Tile ToTile(this Point point)
+        {
+            return AI.GAME.GetTileAt(point.x, point.y);
+        }
+
+        public static Point ToPoint(this Tile tile)
+        {
+            return new Point(tile.X, tile.Y);
+        }
+
+        public static Point ToPoint(this Unit unit)
+        {
+            return unit.Tile.ToPoint();
+        }
+
+        public static Point ToPoint(this Machine machine)
+        {
+            return machine.Tile.ToPoint();
+        }
+
+        public static IEnumerable<T> Singular<T>(this T item)
+        {
+            yield return item;
+        }
     }
 }
