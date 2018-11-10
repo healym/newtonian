@@ -12,9 +12,24 @@ namespace Joueur.cs.Games.Newtonian
             return attacker.Tile.HasNeighbor(target.Tile);
         }
 
-        public static Boolean CanStun(Unit stunner, Unit target)
+        public static Boolean CanStun(Job stunner, Job target)
         {
-            return false;
+            if(stunner == AI.INTERN && target != AI.PHYSICIST)
+                {
+                 return false;
+                }
+            if(stunner == AI.MANAGER && target != AI.INTERN)
+                {
+                 return false;
+                }
+            if(stunner == AI.PHYSICIST && target != AI.MANAGER)
+                {
+                 return false;
+                }
+            else
+                {
+                return true;
+                }
         }
 
         public static Boolean CanSabotageMachine(Unit saboteur)
