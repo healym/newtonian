@@ -109,5 +109,21 @@ namespace Joueur.cs.Games.Newtonian
         {
             yield return item;
         }
+
+        public static int GetAmount(this Tile tile, string oreType)
+        {
+            switch (oreType)
+            {
+                case AI.REDIUM:
+                    return tile.Redium;
+                case AI.REDIUMORE:
+                    return tile.RediumOre;
+                case AI.BLUEIUM:
+                    return tile.Blueium;
+                case AI.BLUEIUMORE:
+                    return tile.BlueiumOre;
+            }
+            return 0;
+        }
     }
 }
