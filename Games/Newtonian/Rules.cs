@@ -7,19 +7,19 @@ namespace Joueur.cs.Games.Newtonian
 {
     public static class Rules
     {
-        public static Boolean CanAttack(Unit attacker, Unit target)
+        public static bool CanAttack(Unit attacker, Unit target)
         {
             return !attacker.Acted && attacker.Tile.HasNeighbor(target.Tile);
         }
 
-        public static Boolean CanStun(Job stunner, Job target)
+        public static bool CanStun(Job stunner, Job target)
         {
             return (stunner == AI.INTERN && target == AI.PHYSICIST)
                 || (stunner == AI.PHYSICIST && target == AI.MANAGER)
                 || (stunner == AI.MANAGER && target == AI.INTERN);
         }
 
-        public static Boolean CanBeWorked(Machine m)
+        public static bool CanBeWorked(Machine m)
         {
             if (m.Worked > 0)
             {
@@ -35,17 +35,17 @@ namespace Joueur.cs.Games.Newtonian
             }
         }
 
-        public static Boolean CanHeal(Unit u)
+        public static bool CanHeal(Unit u)
         {
             return u.Tile.Owner == u.Owner;
         }
 
-        public static Boolean CanPickup(Unit u)
+        public static bool CanPickup(Unit u)
         {
-            return !IsFull(u) && IsNextToResources(u);
+            return OpenCapacity(u) > 0 && IsNextToResources(u);
         }
 
-        public static Boolean IsNextToResources(Unit u)
+        public static bool IsNextToResources(Unit u)
         {
             if (u.Job == AI.INTERN || u.Job == AI.PHYSICIST)
             {
@@ -64,24 +64,12 @@ namespace Joueur.cs.Games.Newtonian
             return false;
         }
 
-        public static Boolean IsFull(Unit u)
+        public static int OpenCapacity(Unit u)
         {
-            if (u.Job == AI.MANAGER)
-            {
-                return u.Blueium + u.Redium < AI.MANAGER.CarryLimit;
-            }
-            if (u.Job == AI.PHYSICIST)
-            {
-                return u.Blueium + u.BlueiumOre + u.Redium + u.RediumOre < AI.PHYSICIST.CarryLimit;
-            }
-            if (u.Job == AI.INTERN)
-            {
-                return u.BlueiumOre + u.RediumOre < AI.INTERN.CarryLimit;
-            }
-            return false; // should never happen, outside domain
+            return u.Job.CarryLimit - (u.Blueium + u.BlueiumOre + u.Redium + u.RediumOre);
         }
 
-        public static Boolean CanSabotageMachine(Unit saboteur, Machine target)
+        public static bool CanSabotageMachine(Unit saboteur, Machine target)
         {
             return false;
         }
