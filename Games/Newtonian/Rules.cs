@@ -7,6 +7,11 @@ namespace Joueur.cs.Games.Newtonian
 {
     public static class Rules
     {
+        public static Boolean CanAttack(Unit attacker, Unit target)
+        {
+            return attacker.Tile.HasNeighbor(target.Tile);
+        }
+
         public static Boolean CanStun(Unit stunner, Unit target)
         {
             return false;
