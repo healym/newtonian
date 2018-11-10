@@ -14,17 +14,11 @@ namespace Joueur.cs.Games.Newtonian
 
         public static Boolean CanStun(Job stunner, Job target)
         {
-            if(stunner == AI.INTERN && target != AI.PHYSICIST)
+            if ((stunner == AI.INTERN && target != AI.PHYSICIST)
+              || (stunner == AI.MANAGER && target != AI.PHYSICIST)
+              || (stunner == AI.PHYSICIST && target != AI.MANAGER))
             {
-                 return false;
-            }
-            if(stunner == AI.MANAGER && target != AI.INTERN)
-            {
-                 return false;
-            }
-            if(stunner == AI.PHYSICIST && target != AI.MANAGER)
-            {
-                 return false;
+                return false;
             }
             else
             {
