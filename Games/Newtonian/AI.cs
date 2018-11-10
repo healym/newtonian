@@ -116,6 +116,14 @@ namespace Joueur.cs.Games.Newtonian
         public bool RunTurn()
         {
             RunInterns();
+            foreach (var manager in this.Player.Units.Where(u => u != null && u.Tile != null && u.Job == AI.MANAGER))
+            {
+                Solver.RunManager(manager);
+            }
+            foreach (var physicist in this.Player.Units.Where(u => u != null && u.Tile != null && u.Job == AI.PHYSICIST))
+            {
+                Solver.RunPhysicist(physicist, this.Game.Machines);
+            }
 
             return true;
             // <<-- /Creer-Merge: runTurn -->>
@@ -125,34 +133,66 @@ namespace Joueur.cs.Games.Newtonian
         {
             foreach (var intern in this.Player.Units.Where(u => u != null && u.Tile != null && u.Job == AI.INTERN))
             {
-                var needyMachines = this.Game.Machines.Where(m => !Rules.CanBeWorked(m)).ToArray();
+                if (Rules.OpenCapacity(intern) > 0)
+                {
+                    var needyMachines = this.Game.Machines.Where(m => !Rules.CanBeWorked(m)).ToArray();
 
-                var oreType = AI.REDIUMORE;
-                if (intern.BlueiumOre > 0)
-                {
-                    oreType = AI.BLUEIUMORE;
-                }
-                else if (intern.RediumOre == 0)
-                {
-                    var redCount = needyMachines.Count(m => m.OreType == AI.REDIUM);
-                    if (redCount * 2 > needyMachines.Length)
+                    var oreType = AI.REDIUMORE;
+                    if (intern.BlueiumOre > 0)
                     {
                         oreType = AI.BLUEIUMORE;
                     }
+                    else if (intern.RediumOre == 0)
+                    {
+                        var redCount = needyMachines.Count(m => m.OreType == AI.REDIUM);
+                        if (redCount * 2 > needyMachines.Length)
+                        {
+                            oreType = AI.BLUEIUMORE;
+                        }
+                    }
+                    var machineType = oreType == AI.REDIUMORE ? AI.REDIUM : AI.BLUEIUM;
+
+                    var pickupPoints = this.Game.Tiles.Where(t => t.GetAmount(oreType) > 0 && (t.Machine == null || t.Machine.OreType != machineType)).Select(t => t.ToPoint()).ToHashSet();
+                    var path = Solver.GetPath(intern.ToPoint().Singular(), p => pickupPoints.Contains(p));
+                    if (path != null && path.Count() > 0)
+                    {
+                        foreach (var step in path.Skip(1).SkipLast(1).Take(intern.Moves))
+                        {
+                            intern.Move(step.ToTile());
+                        }
+                        var pickup = path.Last().ToTile();
+                        if (intern.Tile == pickup || intern.Tile.HasNeighbor(pickup))
+                        {
+                            intern.Pickup(pickup, Rules.OpenCapacity(intern), oreType);
+                        }
+                    }
                 }
 
-                var pickupPoints = this.Game.Tiles.Where(t => t.GetAmount(oreType) > 0).Select(t => t.ToPoint()).ToHashSet();
-                var path = Solver.GetPath(intern.ToPoint().Singular(), p => pickupPoints.Contains(p));
-                if (path != null)
+
+                if (Rules.OpenCapacity(intern) == 0)
                 {
-                    foreach (var step in path.Skip(1).SkipLast(1).Take(intern.Moves))
+                    var dropType = intern.RediumOre > intern.BlueiumOre ? AI.REDIUMORE : AI.BLUEIUMORE;
+                    var generatorType = intern.RediumOre > intern.BlueiumOre ? AI.REDIUM : AI.BLUEIUM;
+
+                    var goalMachines = AI.GAME.Machines.Where(m => m.OreType == generatorType && m.Tile.GetAmount(dropType) < m.RefineInput);
+                    if (!goalMachines.Any())
                     {
-                        intern.Move(step.ToTile());
+                        goalMachines = AI.GAME.Machines.Where(m => m.OreType == generatorType);
                     }
-                    var pickup = path.Last().ToTile();
-                    if (intern.Tile.HasNeighbor(pickup))
+                    var goalPoints = goalMachines.Select(t => t.ToPoint()).ToHashSet();
+                    var path = Solver.GetPath(intern.ToPoint().Singular(), (p => goalPoints.Contains(p)));
+                    if (path != null && path.Count() > 0)
                     {
-                        // intern.Pickup(pickup, intern.)
+                        
+                        foreach (Point step in path.Skip(1).SkipLast(1).Take(intern.Moves))
+                        {
+                            intern.Move(step.ToTile());
+                        }
+                        var dropTile = path.Last().ToTile();
+                        if (intern.Tile == dropTile || intern.Tile.HasNeighbor(dropTile))
+                        {
+                            intern.Drop(dropTile, AI.MANAGER.CarryLimit, dropType);
+                        }
                     }
                 }
             }

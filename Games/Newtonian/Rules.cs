@@ -25,7 +25,7 @@ namespace Joueur.cs.Games.Newtonian
             {
                 return true; // machines already worked can continue to be worked
             }
-            if (m.OreType == "Redium")
+            if (m.OreType == AI.REDIUM)
             {
                 return m.Tile.RediumOre >= m.RefineInput;
             }
