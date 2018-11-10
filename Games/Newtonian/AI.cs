@@ -27,11 +27,15 @@ namespace Joueur.cs.Games.Newtonian
         /// This is your AI's player. It contains all the information about your player's state.
         /// </summary>
         public readonly Player Player;
-        #pragma warning restore 0169
-        #pragma warning restore 0649
+#pragma warning restore 0169
+#pragma warning restore 0649
 
         // <<-- Creer-Merge: properties -->> - Code you add between this comment and the end comment will be preserved between Creer re-runs.
-        // you can add additional properties here for your AI to use
+        public static Game GAME;
+        public static Player PLAYER;
+        public static Job INTERN;
+        public static Job MANAGER;
+        public static Job PHYSICIST;
         // <<-- /Creer-Merge: properties -->>
         #endregion
 
@@ -58,8 +62,14 @@ namespace Joueur.cs.Games.Newtonian
         {
             // <<-- Creer-Merge: start -->> - Code you add between this comment and the end comment will be preserved between Creer re-runs.
             base.Start();
-
             Console.Clear();
+
+            AI.GAME = this.Game;
+            AI.PLAYER = this.Player;
+
+            AI.INTERN = this.Game.Jobs.First(j => j.Title == "intern");
+            AI.MANAGER = this.Game.Jobs.First(j => j.Title == "manager");
+            AI.PHYSICIST = this.Game.Jobs.First(j => j.Title == "physicist");
             // <<-- /Creer-Merge: start -->>
         }
 
