@@ -12,19 +12,34 @@ namespace Joueur.cs.Games.Newtonian
             return attacker.Tile.HasNeighbor(target.Tile);
         }
 
-        public static Boolean CanStun(Unit stunner, Unit target)
+        public static Boolean CanStun(Job stunner, Job target)
         {
-            return false;
+            if ((stunner == AI.INTERN && target != AI.PHYSICIST)
+              || (stunner == AI.MANAGER && target != AI.PHYSICIST)
+              || (stunner == AI.PHYSICIST && target != AI.MANAGER))
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
 
-        public static Boolean CanSabotageMachine(Unit saboteur)
+        public static Boolean CanBeWorked(Machine m)
         {
-            return saboteur.Job == AI.INTERN && saboteur.Tile.GetNeighbors().Any(t => t.Machine != null);
-        }
-
-        public static Boolean CanWorkOnMachine(Unit worker)
-        {
-            return worker.Job == AI.PHYSICIST && worker.Tile.GetNeighbors().Any(t => t.Machine != null);
+            if (m.Worked > 0)
+            {
+                return true; // machines already worked can continue to be worked
+            }
+            if (m.OreType == "Redium")
+            {
+                return m.Tile.RediumOre >= m.RefineInput;
+            }
+            else
+            {
+                return m.Tile.BlueiumOre >= m.RefineInput;
+            }
         }
     }
 }
