@@ -36,6 +36,10 @@ namespace Joueur.cs.Games.Newtonian
         public static Job INTERN;
         public static Job MANAGER;
         public static Job PHYSICIST;
+        public const string REDIUM = "redium";
+        public const string BLUEIUM = "blueium";
+        public const string REDIUMORE = "redium ore";
+        public const string BLUEIUMORE = "blueium ore";
         // <<-- /Creer-Merge: properties -->>
         #endregion
 
@@ -111,268 +115,47 @@ namespace Joueur.cs.Games.Newtonian
         /// <returns>Represents if you want to end your turn. True means end your turn, False means to keep your turn going and re-call this function.</returns>
         public bool RunTurn()
         {
-            // <<-- Creer-Merge: runTurn -->> - Code you add between this comment and the end comment will be preserved between Creer re-runs.
-            // Put your game logic here for runTurn
-            /*DisplayMap();
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.BackgroundColor = ConsoleColor.Black;*/
-
-            /*
-            Please note: This code is intentionally bad. You should try to optimize everything here. THe code here is only to show you how to use the game's
-                        mechanics with the MegaMinerAI server framework.
-            */
-
-            // Goes through all the units that you own.
-            foreach (Unit unit in this.Player.Units) {
-                // Only tries to do something if the unit actually exists.
-                if (unit != null && unit.Tile != null) {
-                    if (unit.Job.Title == "physicist") {
-                        // If the unit is a physicist, tries to work on machines that are ready, but if there are none,
-                        // it finds and attacks enemy managers.
-
-                        // Tries to find a workable machine for blueium ore.
-                        // Note: You need to get redium ore as well.
-                        Tile target = null;
-
-                        // Goes through all the machines in the game and picks one that is ready to process ore as its target.
-                        foreach (Machine machine in this.Game.Machines) {
-                            if (machine.Tile.BlueiumOre >= machine.RefineInput) {
-                                target = machine.Tile;
-                            }
-                        }
-
-                        if (target == null) {
-                            // Chases down enemy managers if there are no machines that are ready to be worked.
-                            foreach (Unit enemy in this.Game.Units) {
-                                // Only does anything if the unit that we found is a manager and belongs to our opponent.
-                                if (enemy.Tile != null && enemy.Owner == this.Player.Opponent && enemy.Job.Title == "manager") {
-                                    // Moves towards the manager.
-                                    while (unit.Moves > 0 && this.FindPath(unit.Tile, enemy.Tile).Count > 0) {
-                                        // Moves until there are no moves left for the physicist.
-                                        if (!unit.Move(this.FindPath(unit.Tile, enemy.Tile)[0])) {
-                                            break;
-                                        }
-                                    }
-                                    if (unit.Tile == enemy.Tile.TileEast || unit.Tile == enemy.Tile.TileWest ||
-                                        unit.Tile == enemy.Tile.TileNorth || unit.Tile == enemy.Tile.TileSouth) {
-                                        if (enemy.StunTime == 0 && enemy.StunImmune == 0) {
-                                            // Stuns the enemy manager if they are not stunned and not immune.
-                                            unit.Act(enemy.Tile);
-                                        }
-                                        else {
-                                            // Attacks the manager otherwise.
-                                            unit.Attack(enemy.Tile);
-                                        }
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-                        else {
-                            // Gets the tile of the targeted machine if adjacent to it.
-                            bool adjacent = false;
-                            foreach (Tile tile in target.GetNeighbors()) {
-                                if (tile == unit.Tile) {
-                                    adjacent = true;
-                                }
-                            }
-                            // If there is a machine that is waiting to be worked on, go to it.
-                            while (unit.Moves > 0 && this.FindPath(unit.Tile, target).Count > 1) {// && !adjacent) {
-                                if (!unit.Move(this.FindPath(unit.Tile, target)[0])) {
-                                    break;
-                                }
-                            }
-                            // Acts on the target machine to run it if the physicist is adjacent.
-                            if (adjacent && !unit.Acted) {
-                                unit.Act(target);
-                            }
-                        }
-                    }
-                    else if (unit.Job.Title == "intern") {
-                        // If the unit is an intern, collects blueium ore.
-                        // Note: You also need to collect redium ore.
-
-                        // Goes to gather resources if currently carrying less than the carry limit.
-                        if (unit.BlueiumOre < unit.Job.CarryLimit) {
-                            // Your intern's current target.
-                            Tile target = null;
-
-                            // Goes to collect blueium ore that isn't on a machine.
-                            foreach (Tile tile in this.Game.Tiles) {
-                                if (tile.BlueiumOre > 0 && tile.Machine == null) {
-                                    target = tile;
-                                    break;
-                                }
-                            }
-                            // Moves towards our target until at the target or out of moves.
-                            if (this.FindPath(unit.Tile, target).Count > 0) {
-                                while (unit.Moves > 0 && this.FindPath(unit.Tile, target).Count > 0) {
-                                    if (!unit.Move(this.FindPath(unit.Tile, target)[0])) {
-                                        break;
-                                    }
-                                }
-                            }
-                            // Picks up the appropriate resource once we reach our target's tile.
-                            if (unit.Tile == target && target.BlueiumOre > 0) {
-                                unit.Pickup(target, 0, "blueium ore");
-                            }
-                        }
-                        else {
-                            // Deposits blueium ore in a machine for it if we have any.
-
-                            // Finds a machine in the game's tiles that takes blueium ore.
-                            foreach (Tile tile in this.Game.Tiles) {
-                                if (tile.Machine != null && tile.Machine.OreType == "blueium") {
-                                    // Moves towards the found machine until we reach it or are out of moves.
-                                    while (unit.Moves > 0 && this.FindPath(unit.Tile, tile).Count > 1) {
-                                        if (!unit.Move(this.FindPath(unit.Tile, tile)[0])) {
-                                            break;
-                                        }
-                                    }
-                                    // Deposits blueium ore on the machine if we have reached it.
-                                    if (this.FindPath(unit.Tile, tile).Count <= 1) {
-                                        unit.Drop(tile, 0, "blueium ore");
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    else if (unit.Job.Title == "manager") {
-                        // Finds enemy interns, stuns, and attacks them if there is no blueium to take to the generator.
-                        Tile target = null;
-
-                        foreach (Tile tile in this.Game.Tiles) {
-                            if (tile.Blueium > 1 && unit.Blueium < unit.Job.CarryLimit) {
-                                target = tile;
-                            }
-                        }
-                        if (target == null && unit.Blueium == 0) {
-                            foreach (Unit enemy in this.Game.Units) {
-                                // Only does anything for an intern that is owned by your opponent.
-                                if (enemy.Tile != null && enemy.Owner == this.Player.Opponent && enemy.Job.Title == "intern") {
-                                    // Moves towards the intern until reached or out of moves.
-                                    while (unit.Moves > 0 && this.FindPath(unit.Tile, enemy.Tile).Count > 1) {
-                                        if (!unit.Move(this.FindPath(unit.Tile, enemy.Tile)[0])) {
-                                            break;
-                                        }
-                                    }
-                                    // Either stuns or attacks the intern if we are within range.
-                                    if (unit.Tile == enemy.Tile.TileEast || unit.Tile == enemy.Tile.TileWest ||
-                                        unit.Tile == enemy.Tile.TileNorth || unit.Tile == enemy.Tile.TileSouth) {
-                                        if (enemy.StunTime == 0 && enemy.StunImmune == 0) {
-                                            // Stuns the enemy intern if they are not stunned and not immune.
-                                            unit.Act(enemy.Tile);
-                                        }
-                                        else {
-                                            // Attacks the intern otherwise.
-                                            unit.Attack(enemy.Tile);
-                                        }
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-                        else if (target != null) {
-                            // Moves towards our target until at the target or out of moves.
-                            while (unit.Moves > 0 && this.FindPath(unit.Tile, target).Count > 1) {
-                                if (!unit.Move(this.FindPath(unit.Tile, target)[0])) {
-                                    break;
-                                }
-                            }
-                            // Picks up blueium once we reach our target's tile.
-                            if (this.FindPath(unit.Tile, target).Count <= 1 && target.Blueium > 0) {
-                                unit.Pickup(target, 0, "blueium");
-                            }
-                        }
-                        else if (target == null && unit.Blueium > 0) {
-                            // Stores a tile that is part of your generator.
-                            Tile genTile = this.Player.GeneratorTiles[0];
-
-                            // Goes to your generator and drops blueium in.
-                            while (unit.Moves > 0 && this.FindPath(unit.Tile, genTile).Count > 0) {
-                                if (!unit.Move(this.FindPath(unit.Tile, genTile)[0])) {
-                                    break;
-                                }
-                            }
-
-                            // Deposits blueium in our generator if we have reached it.
-                            if (this.FindPath(unit.Tile, genTile).Count <= 1) {
-                                unit.Drop(unit.Tile, 0, "blueium");
-                            }
-                        }
-                    }
-                }
-            }
+            RunInterns();
 
             return true;
             // <<-- /Creer-Merge: runTurn -->>
         }
 
-        /// <summary>
-        /// A very basic path finding algorithm (Breadth First Search) that when given a starting Tile, will return a valid path to the goal Tile.
-        /// </summary>
-        /// <remarks>
-        /// This is NOT an optimal pathfinding algorithm. It is intended as a stepping stone if you want to improve it.
-        /// </remarks>
-        /// <param name="start">the starting Tile</param>
-        /// <param name="goal">the goal Tile</param>
-        /// <returns>A list of Tiles representing the path where the first element is a valid adjacent Tile to the start, and the last element is the goal. Or an empty list if no path found.</returns>
-        List<Tile> FindPath(Tile start, Tile goal)
+        public void RunInterns()
         {
-            // no need to make a path to here...
-            if (start == goal)
+            foreach (var intern in this.Player.Units.Where(u => u != null && u.Tile != null && u.Job == AI.INTERN))
             {
-                return new List<Tile>();
-            }
+                var needyMachines = this.Game.Machines.Where(m => !Rules.CanBeWorked(m)).ToArray();
 
-            // the tiles that will have their neighbors searched for 'goal'
-            Queue<Tile> fringe = new Queue<Tile>();
-
-            // How we got to each tile that went into the fringe.
-            Dictionary<Tile, Tile> cameFrom = new Dictionary<Tile, Tile>();
-
-            // Enqueue start as the first tile to have its neighbors searched.
-            fringe.Enqueue(start);
-
-            // keep exploring neighbors of neighbors... until there are no more.
-            while (fringe.Any())
-            {
-                // the tile we are currently exploring.
-                Tile inspect = fringe.Dequeue();
-
-                // cycle through the tile's neighbors.
-                foreach (Tile neighbor in inspect.GetNeighbors())
+                var oreType = AI.REDIUMORE;
+                if (intern.BlueiumOre > 0)
                 {
-                    if (neighbor == goal)
+                    oreType = AI.BLUEIUMORE;
+                }
+                else if (intern.RediumOre == 0)
+                {
+                    var redCount = needyMachines.Count(m => m.OreType == AI.REDIUM);
+                    if (redCount * 2 > needyMachines.Length)
                     {
-                        // Follow the path backward starting at the goal and return it.
-                        List<Tile> path = new List<Tile>();
-                        path.Add(goal);
-
-                        // Starting at the tile we are currently at, insert them retracing our steps till we get to the starting tile
-                        for (Tile step = inspect; step != start; step = cameFrom[step])
-                        {
-                            path.Insert(0, step);
-                        }
-
-                        return path;
+                        oreType = AI.BLUEIUMORE;
                     }
+                }
 
-                    // if the tile exists, has not been explored or added to the fringe yet, and it is pathable
-                    if (neighbor != null && !cameFrom.ContainsKey(neighbor) && neighbor.IsPathable())
+                var pickupPoints = this.Game.Tiles.Where(t => t.GetAmount(oreType) > 0).Select(t => t.ToPoint()).ToHashSet();
+                var path = Solver.GetPath(intern.ToPoint().Singular(), p => pickupPoints.Contains(p));
+                if (path != null)
+                {
+                    foreach (var step in path.Skip(1).SkipLast(1).Take(intern.Moves))
                     {
-                        // add it to the tiles to be explored and add where it came from.
-                        fringe.Enqueue(neighbor);
-                        cameFrom.Add(neighbor, inspect);
+                        intern.Move(step.ToTile());
                     }
-
-                } // foreach(neighbor)
-
-            } // while(fringe not empty)
-
-            // if you're here, that means that there was not a path to get to where you want to go.
-            //   in that case, we'll just return an empty path.
-            return new List<Tile>();
+                    var pickup = path.Last().ToTile();
+                    if (intern.Tile.HasNeighbor(pickup))
+                    {
+                        // intern.Pickup(pickup, intern.)
+                    }
+                }
+            }
         }
 
         // <<-- Creer-Merge: methods -->> - Code you add between this comment and the end comment will be preserved between Creer re-runs.
