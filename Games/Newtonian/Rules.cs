@@ -16,5 +16,10 @@ namespace Joueur.cs.Games.Newtonian
         {
             return saboteur.Job == AI.INTERN && saboteur.Tile.GetNeighbors().Any(t => t.Machine != null);
         }
+
+        public static Boolean CanWorkOnMachine(Unit worker)
+        {
+            return worker.Job == AI.PHYSICIST && worker.Tile.GetNeighbors().Any(t => t.Machine != null);
+        }
     }
 }
