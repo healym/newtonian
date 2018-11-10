@@ -50,12 +50,12 @@ namespace Joueur.cs.Games.Newtonian
             {
                 var goalTiles = AI.GAME.Tiles.Where(t => t.Type == "generator").ToHashSet();
                 var path = GetPath(u.ToPoint().Singular(), (p => goalTiles.Contains(p.ToTile()))).ToArray();
-                foreach(Point step in path.Skip(1).SkipLast(1).Take(u.Moves))
+                foreach (Point step in path.Skip(1).SkipLast(1).Take(u.Moves))
                 {
                     u.Move(step.ToTile());
                 }
                 var jenny = path.Last().ToTile();
-                if(u.Tile == jenny || u.Tile.HasNeighbor(jenny))
+                if (u.Tile == jenny || u.Tile.HasNeighbor(jenny))
                 {
                     u.Drop(jenny, AI.MANAGER.CarryLimit, AI.REDIUM);
                     u.Drop(jenny, AI.MANAGER.CarryLimit, AI.BLUEIUM);
