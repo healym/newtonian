@@ -9,7 +9,7 @@ namespace Joueur.cs.Games.Newtonian
     {
         public static Boolean CanAttack(Unit attacker, Unit target)
         {
-            return attacker.Tile.HasNeighbor(target.Tile);
+            return !attacker.Acted && attacker.Tile.HasNeighbor(target.Tile);
         }
 
         public static Boolean CanStun(Job stunner, Job target)
@@ -63,6 +63,11 @@ namespace Joueur.cs.Games.Newtonian
                     return true;
                 }
             }
+            return false;
+        }
+
+        public static Boolean CanSabotageMachine(Unit saboteur, Machine target)
+        {
             return false;
         }
 
