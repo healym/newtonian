@@ -40,6 +40,7 @@ namespace Joueur.cs.Games.Newtonian
         public const string BLUEIUM = "blueium";
         public const string REDIUMORE = "redium ore";
         public const string BLUEIUMORE = "blueium ore";
+        public static Random RANDOM = new Random();
         // <<-- /Creer-Merge: properties -->>
         #endregion
 
@@ -127,8 +128,41 @@ namespace Joueur.cs.Games.Newtonian
 
         public void LogEnemies()
         {
+            AI.GAME.Units.Where(u => u.Job == AI.INTERN).ForEach(u => LogIntern(u));
+            AI.GAME.Units.Where(u => u.Job == AI.PHYSICIST).ForEach(u => LogPhysicist(u));
+            AI.GAME.Units.Where(u => u.Job == AI.MANAGER).ForEach(u => LogManager(u));
+        }
+
+        public void LogIntern(Unit u)
+        {
+            string[] internSayings = { "I should be in charge of this dump.",
+                                       "I wonder how much free coffee I can drink in a day.",
+                                       "What does '360 wellness' even mean??",
+                                       "Do you think anybody's noticed that I haven't figured out Git yet?"};
+            int r = RANDOM.Next(internSayings.Count());
+            u.Log(internSayings[r]);
             return;
-            //AI.GAME.Units.Where(u => u.Job == AI.INTERN).ForEach()
+        }
+
+        public void LogPhysicist(Unit u)
+        {
+            string[] physSayings = { "Morning, Mr. Freeman",
+                                     "al;sjhdfa;hd;sakhf;szd" };
+            int r = RANDOM.Next(physSayings.Count());
+            u.Log(physSayings[r]);
+            return;
+        }
+
+        public void LogManager(Unit u)
+        {
+            string[] manSayings = { "hurr durr",
+                                    "pbbbbbbbtttt",
+                                    "We make such a good team",
+                                    "Remember your 360 wellness!",
+                                    "Investigations hurt science."};
+            int r = RANDOM.Next(manSayings.Count());
+            u.Log(manSayings[r]);
+            return;
         }
 
         public void ClearUnitLogs()
