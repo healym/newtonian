@@ -140,21 +140,22 @@ namespace Joueur.cs.Games.Newtonian
         public void LogEnemies()
         {
             var interns = AI.GAME.Units.Where(u => u.Job == AI.INTERN).ToArray();
-            for (var i = 0; i < RANDOM.Next() % 10; i++)
+            var ri = RANDOM.Next(3);
+            for (var i = 0; i < ri; i++)
             {
                 var randIntern = RANDOM.Next(interns.Count());
                 LogIntern(interns[randIntern]);
             }
 
             var phys = AI.GAME.Units.Where(u => u.Job == AI.PHYSICIST).ToArray();
-            for (var i = 0; i < RANDOM.Next() % 10; i++)
+            for (var i = 0; i < ri; i++)
             {
                 var randPhys = RANDOM.Next(interns.Count());
                 LogPhysicist(phys[randPhys]);
             }
 
             var mans = AI.GAME.Units.Where(u => u.Job == AI.MANAGER).ToArray();
-            for (var i = 0; i < RANDOM.Next() % 10; i++)
+            for (var i = 0; i < ri; i++)
             {
                 var randMan = RANDOM.Next(mans.Count());
                 LogIntern(mans[randMan]);
