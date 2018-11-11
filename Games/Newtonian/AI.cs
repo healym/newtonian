@@ -129,6 +129,8 @@ namespace Joueur.cs.Games.Newtonian
             LogInventories();
 
             // Score();
+            // Dos();
+            // Assault();
             RunInterns();
             RunPhysicists();
             RunManagers();
@@ -141,6 +143,15 @@ namespace Joueur.cs.Games.Newtonian
             CleanupCleanupEverybodyEverywhere();
             return true;
             // <<-- /Creer-Merge: runTurn -->>
+        }
+
+        public void Assault(IEnumerable<Unit> units)
+        {
+            //foreach (var unit in units)
+            //{
+            //    var targetJob = unit.Job == AI.INTERN ? AI.PHYSICIST : (unit.Job == AI.PHYSICIST ? AI.MANAGER : AI.INTERN);
+            //    Solver.MoveAndAttack(AI.PLAYER.Opponent())
+            //}
         }
 
         public void RunInterns()
@@ -459,6 +470,31 @@ namespace Joueur.cs.Games.Newtonian
         public void ClearUnitLogs()
         {
             AI.GAME.Units.ForEach(u => u.SetLog(""));
+        }
+
+        public void Dos()
+        {
+            var interns = this.Player.UsableUnits().Where(u => u.Job == AI.INTERN).ToList();
+            while (true)
+            {
+                var workableMachines = this.Game.Machines.Where(m => m.CanBeWorked() && m.Worked > 1);
+                var path = Solver.ShortestPath(workableMachines.Select(m => m.ToPoint()), interns.Select(i => i.ToPoint()));
+                if (path.Count() >= 1)
+                {
+                    var machinePoint = path.First();
+                    var intern = path.Last().ToTile().Unit;
+                    Solver.Move(intern, machinePoint.Singular().ToHashSet());
+                    if (intern.Tile.HasNeighbor(machinePoint.ToTile()))
+                    {
+                        intern.Act(machinePoint.ToTile());
+                    }
+                    interns.Remove(intern);
+                }
+                else
+                {
+                    break;
+                }
+            }
         }
 
         public void Score()
