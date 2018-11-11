@@ -325,22 +325,22 @@ namespace Joueur.cs.Games.Newtonian
             {
                 if (unit.OpenCapacity() > 0)
                 {
-                    if (unit.GetAmount(AI.REDIUM) > 0)
+                    if (unit.Tile.GetAmount(AI.REDIUM) > 0)
                     {
                         unit.Pickup(unit.Tile, -1, AI.REDIUM);
                         unit.Log(unit.FullCapacity().ToString());
                     }
-                    if (unit.GetAmount(AI.BLUEIUM) > 0)
+                    if (unit.Tile.GetAmount(AI.BLUEIUM) > 0)
                     {
                         unit.Pickup(unit.Tile, -1, AI.BLUEIUM);
                         unit.Log(unit.FullCapacity().ToString());
                     }
-                    if (unit.GetAmount(AI.REDIUMORE) > 0)
+                    if (unit.Tile.GetAmount(AI.REDIUMORE) > 0)
                     {
                         unit.Pickup(unit.Tile, -1, AI.REDIUMORE);
                         unit.Log(unit.FullCapacity().ToString());
                     }
-                    if (unit.GetAmount(AI.BLUEIUMORE) > 0)
+                    if (unit.Tile.GetAmount(AI.BLUEIUMORE) > 0)
                     {
                         unit.Pickup(unit.Tile, -1, AI.BLUEIUMORE);
                         unit.Log(unit.FullCapacity().ToString());
