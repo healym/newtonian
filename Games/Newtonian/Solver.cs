@@ -11,11 +11,11 @@ namespace Joueur.cs.Games.Newtonian
         {
             return new AStar<Point>(starts, isGoal, (a, b) => 1, p => 0, p =>
             {
-                return p.GetNeighboors().Where(n => n.ToTile().IsPathable() || isGoal(n));
+                return p.GetNeighbors().Where(n => n.ToTile().IsPathable() || isGoal(n));
             }).Path;
         }
 
-        public static IEnumerable<Point> GetNeighboors(this Point point)
+        public static IEnumerable<Point> GetNeighbors(this Point point)
         {
             if (point.x > 0)
             {
@@ -32,6 +32,32 @@ namespace Joueur.cs.Games.Newtonian
             if (point.y < AI.GAME.MapHeight - 1)
             {
                 yield return new Point(point.x, point.y + 1);
+            }
+        }
+
+        public static IEnumerable<Point> GetDiagonals(this Point point)
+        {
+            if (point.x > 0)
+            {
+                if (point.y > 0)
+                {
+                    yield return new Point(point.x - 1, point.y - 1);
+                }
+                if (point.y < AI.GAME.MapHeight - 1)
+                {
+                    yield return new Point(point.x - 1, point.y + 1);
+                }
+            }
+            if (point.x < AI.GAME.MapWidth - 1)
+            {
+                if (point.y > 0)
+                {
+                    yield return new Point(point.x + 1, point.y - 1);
+                }
+                if (point.y < AI.GAME.MapHeight - 1)
+                {
+                    yield return new Point(point.x + 1, point.y + 1);
+                }
             }
         }
 
@@ -96,6 +122,33 @@ namespace Joueur.cs.Games.Newtonian
             }
         }
 
+        public static void Stun(Unit unit, IEnumerable<Unit> targets)
+        {
+            if (!unit.Acted)
+            {
+                foreach(var target in targets.Where(t => t.Owner != unit.Owner && unit.Tile.HasNeighbor(t.Tile)))
+                {
+                    if (Rules.CanStun(unit.Job, target.Job) && target.StunImmune == 0)
+                    {
+                        unit.Act(target.Tile);
+                        return;
+                    }
+                }
+            }
+        }
+
+        public static void Attack(Unit unit, IEnumerable<Unit> targets)
+        {
+            if (Rules.CanAttack(unit))
+            {
+                foreach (var target in targets.Where(t => t.Owner != unit.Owner && unit.Tile.HasNeighbor(t.Tile)))
+                {
+                    unit.Attack(target.Tile);
+                    return;
+                }
+            }
+        }
+
         public static void Move(Unit unit, HashSet<Point> goalPoints)
         {
             if (unit.Moves == 0)
@@ -122,7 +175,7 @@ namespace Joueur.cs.Games.Newtonian
                 {
                     return Enumerable.Empty<Point>();
                 }
-                return p.GetNeighboors().Where(n => n.ToTile().IsPathable() || n.ToTile().Unit != null || goalSet.Contains(n));
+                return p.GetNeighbors().Where(n => n.ToTile().IsPathable() || n.ToTile().Unit != null || goalSet.Contains(n));
             });
             return goals.Where(g => search.GScore.ContainsKey(g)).OrderBy(g => search.GScore[g]);
         }
