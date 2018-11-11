@@ -210,18 +210,18 @@ namespace Joueur.cs.Games.Newtonian
         {
             foreach (var physicist in this.Player.Units.Where(u => u != null && u.Tile != null && u.Job == AI.PHYSICIST))
             {
-                Solver.Move(physicist, AI.GAME.Machines.Where(m => m.CanBeWorked()).Select(m => m.ToPoint()).ToHashSet());
-                Solver.Move(physicist, AI.GAME.Machines.Where(m => m.Tile.Redium > 0 || m.Tile.Blueium > 0).Select(m => m.ToPoint()).ToHashSet());
-                Solver.MoveAndAttack(physicist, this.Player.Opponent.Units);
-
-                if (!physicist.Acted)
+                IEnumerable<Point> targets = AI.GAME.Machines.Where(m => m.CanBeWorked()).Select(m => m.ToPoint());
+                if (!targets.Any())
                 {
-                    var machineTile = physicist.Tile.GetNeighbors().FirstOrDefault(t => t.Machine != null && t.Machine.CanBeWorked());
-                    if (machineTile != null)
+                    targets = AI.GAME.Machines.Where(m => m.Tile.RediumOre > 0 || m.Tile.BlueiumOre > 0).SelectMany(m => m.ToPoint().GetNeighbors());
+                    if (!targets.Any())
                     {
-                        physicist.Act(machineTile);
+                        targets = AI.GAME.Machines.SelectMany(m => m.ToPoint().GetNeighbors());
                     }
                 }
+                Solver.Move(physicist, targets.ToHashSet());
+                Solver.Work(physicist, AI.GAME.Machines);
+                Solver.Attack(physicist, this.Player.Opponent.Units);
             }
         }
 
