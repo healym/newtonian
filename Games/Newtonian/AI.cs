@@ -135,6 +135,26 @@ namespace Joueur.cs.Games.Newtonian
         {
             foreach (var intern in this.Player.Units.Where(u => u != null && u.Tile != null && u.StunTime == 0 && u.Job == AI.INTERN))
             {
+                var neighborMachine = intern.NeighborMachines().FirstOrDefault();
+                if (neighborMachine != null && neighborMachine.OreType == AI.REDIUM && intern.RediumOre > 0)
+                {
+                    intern.Drop(neighborMachine.Tile, -1, AI.REDIUMORE);
+                }
+                if (neighborMachine != null && neighborMachine.OreType == AI.BLUEIUM && intern.BlueiumOre > 0)
+                {
+                    intern.Drop(neighborMachine.Tile, -1, AI.BLUEIUMORE);
+                }
+                while (neighborMachine != null && neighborMachine.OreType == AI.REDIUM && intern.Tile.GetAmount(AI.REDIUMORE) > 0 && intern.OpenCapacity() > 0)
+                {
+                    intern.Pickup(intern.Tile, -1, AI.REDIUMORE);
+                    intern.Drop(neighborMachine.Tile, -1, AI.REDIUMORE);
+                }
+                while (neighborMachine != null && neighborMachine.OreType == AI.BLUEIUM && intern.Tile.GetAmount(AI.BLUEIUMORE) > 0 && intern.OpenCapacity() > 0)
+                {
+                    intern.Pickup(intern.Tile, -1, AI.BLUEIUMORE);
+                    intern.Drop(neighborMachine.Tile, -1, AI.BLUEIUMORE);
+                }
+
                 IEnumerable<string> oreTypes = new[] { AI.BLUEIUMORE, AI.REDIUMORE };
 
                 var victoryTypes = new List<string>();
@@ -191,7 +211,10 @@ namespace Joueur.cs.Games.Newtonian
                         machines = AI.GAME.Machines.Where(m => m.OreType == machineType);
                     }
                     Solver.MoveAndDrop(intern, AI.GAME.Machines.Where(m => m.OreType == machineType).Select(m => m.Tile), dropType.Singular());
-                    Solver.MoveAndDrop(intern, AI.GAME.Machines.Where(m => m.OreType == machineType).Select(m => m.Tile), dropType.Singular());
+                    Solver.MoveAndDrop(intern, AI.PLAYER.Units.Where(u => {
+                        var n = u.NeighborMachines().FirstOrDefault();
+                        return n != null && n.OreType == machineType && (u.Job == AI.INTERN || u.Job == AI.PHYSICIST);
+                    }).Select(m => m.Tile), dropType.Singular());
                 }
             }
         }
@@ -234,6 +257,7 @@ namespace Joueur.cs.Games.Newtonian
                         guardMachines = AI.GAME.Machines;
                     }
                 }
+                Solver.Move(manager, guardMachines.SelectMany(m => m.Tile.GetNeighbors().Where(t => t.IsPathable() || t.Unit != null && t.Unit.Owner != manager.Owner)).Select(t => t.ToPoint()).ToHashSet());
                 Solver.Move(manager, guardMachines.SelectMany(m => m.Tile.GetNeighbors()).Select(t => t.ToPoint()).ToHashSet());
                 Congratulate(manager);
             }
@@ -257,6 +281,17 @@ namespace Joueur.cs.Games.Newtonian
                 {
                     physicist.Drop(physicist.Tile, -1, AI.REDIUM);
                     physicist.Drop(physicist.Tile, -1, AI.BLUEIUM);
+                }
+                var neighborMachine = physicist.NeighborMachines().FirstOrDefault();
+                while(neighborMachine != null && neighborMachine.OreType == AI.REDIUM && physicist.Tile.GetAmount(AI.REDIUMORE) > 0 && physicist.OpenCapacity() > 0)
+                {
+                    physicist.Pickup(physicist.Tile, -1, AI.REDIUMORE);
+                    physicist.Drop(neighborMachine.Tile, -1, AI.REDIUMORE);
+                }
+                while (neighborMachine != null && neighborMachine.OreType == AI.BLUEIUM && physicist.Tile.GetAmount(AI.BLUEIUMORE) > 0 && physicist.OpenCapacity() > 0)
+                {
+                    physicist.Pickup(physicist.Tile, -1, AI.BLUEIUMORE);
+                    physicist.Drop(neighborMachine.Tile, -1, AI.BLUEIUMORE);
                 }
                 IEnumerable<Point> targets = AI.GAME.Machines.Where(m => m.CanBeWorked()).Select(m => m.ToPoint());
                 if (!targets.Any())
