@@ -320,11 +320,11 @@ namespace Joueur.cs.Games.Newtonian
                 IEnumerable<Point> targets = AI.GAME.Machines.Where(m => m.CanBeWorked()).Select(m => m.ToPoint());
                 if (!targets.Any())
                 {
-                    targets = AI.GAME.Machines.Where(m => m.Tile.RediumOre > 0 || m.Tile.BlueiumOre > 0).SelectMany(m => m.ToPoint().GetNeighbors());
+                    targets = AI.GAME.Machines.Where(m => m.Tile.RediumOre > 0 || m.Tile.BlueiumOre > 0).Select(m => m.ToPoint());
                     if (!targets.Any())
                     {
 
-                        targets = ((this.Player == this.Game.Players[0]) ? AI.CLOSEST_BLUEIUM : AI.CLOSEST_REDIUM).ToPoint().GetNeighbors();
+                        targets = ((this.Player == this.Game.Players[0]) ? AI.CLOSEST_BLUEIUM : AI.CLOSEST_REDIUM).ToPoint().Singular();
                     }
                 }
                 Solver.Move(physicist, targets.ToHashSet());
