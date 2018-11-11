@@ -128,7 +128,22 @@ namespace Joueur.cs.Games.Newtonian
             foreach (var intern in this.Player.Units.Where(u => u != null && u.Tile != null && u.Job == AI.INTERN))
             {
                 IEnumerable<string> oreTypes = new[] { AI.BLUEIUMORE, AI.REDIUMORE };
-                if (intern.RediumOre != 0 && intern.BlueiumOre == 0)
+
+                var victoryTypes = new List<string>();
+                if ((this.Player.Pressure * (this.Player.Heat + AI.MANAGER.CarryLimit * AI.GAME.RefinedValue)) > this.Game.VictoryAmount)
+                {
+                    victoryTypes.Add(AI.REDIUM);
+                }
+                if ((this.Player.Heat * (this.Player.Pressure + AI.MANAGER.CarryLimit * AI.GAME.RefinedValue)) > this.Game.VictoryAmount)
+                {
+                    victoryTypes.Add(AI.BLUEIUM);
+                }
+
+                if (victoryTypes.Count > 0)
+                {
+                    oreTypes = victoryTypes;
+                }
+                else if (intern.RediumOre != 0 && intern.BlueiumOre == 0)
                 {
                     oreTypes = AI.REDIUMORE.Singular();
                 }
@@ -139,19 +154,19 @@ namespace Joueur.cs.Games.Newtonian
                 else
                 {
                     var needyMachines = this.Game.Machines.Where(m => !Rules.CanBeWorked(m));
-                    //var redCount = needyMachines.Count(m => m.OreType == AI.REDIUM);
-                    //var blueCount = needyMachines.Count(m => m.OreType == AI.BLUEIUM);
-                    //if ((blueCount == 0 && redCount > 0) || (blueCount == 1 && redCount == 3))
-                    //{
-                    //    oreTypes = AI.REDIUMORE.Singular();
-                    //}
-                    //if ((redCount == 0 && blueCount > 0) || (redCount == 1 && blueCount == 3))
-                    //{
-                    //    oreTypes = AI.BLUEIUMORE.Singular();
-                    //}
+                    var redCount = needyMachines.Count(m => m.OreType == AI.REDIUM);
+                    var blueCount = needyMachines.Count(m => m.OreType == AI.BLUEIUM);
+                    if ((blueCount == 0 && redCount > 0) || (blueCount == 1 && redCount == 3))
+                    {
+                        oreTypes = AI.REDIUMORE.Singular();
+                    }
+                    if ((redCount == 0 && blueCount > 0) || (redCount == 1 && blueCount == 3))
+                    {
+                        oreTypes = AI.BLUEIUMORE.Singular();
+                    }
 
-                    var closestMachine = Solver.FindNearest(this.Player.GeneratorTiles.Select(t => t.ToPoint()), needyMachines.Select(m => m.Tile.ToPoint())).First();
-                    oreTypes = closestMachine.ToTile().Machine.OreType == AI.REDIUM ? AI.REDIUMORE.Singular() : AI.BLUEIUMORE.Singular();
+                    //var closestMachine = Solver.FindNearest(this.Player.GeneratorTiles.Select(t => t.ToPoint()), needyMachines.Select(m => m.Tile.ToPoint())).First();
+                    //oreTypes = closestMachine.ToTile().Machine.OreType == AI.REDIUM ? AI.REDIUMORE.Singular() : AI.BLUEIUMORE.Singular();
                 }
                 for (var i = 0; i < 4; i++)
                 {
@@ -183,11 +198,11 @@ namespace Joueur.cs.Games.Newtonian
                     Solver.MoveAndPickup(manager, AI.GAME.Tiles, goalTypes);
                 }
 
-                if (Rules.OpenCapacity(manager) == 0)
+                if (Rules.OpenCapacity(manager) < AI.MANAGER.CarryLimit)
                 {
-                    Solver.MoveAndDrop(manager, AI.GAME.Tiles.Where(t => t.Type == "generator"), goalTypes);
+                    Solver.MoveAndDrop(manager, this.Player.GeneratorTiles, goalTypes);
                 }
-                Solver.MoveAndAttack(manager, AI.GAME.Units.Where(u => u.Owner != manager.Owner));
+                Solver.MoveAndAttack(manager, this.Player.Opponent.Units);
             }
         }
 
@@ -197,7 +212,7 @@ namespace Joueur.cs.Games.Newtonian
             {
                 Solver.Move(physicist, AI.GAME.Machines.Where(m => m.CanBeWorked()).Select(m => m.ToPoint()).ToHashSet());
                 Solver.Move(physicist, AI.GAME.Machines.Where(m => m.Tile.Redium > 0 || m.Tile.Blueium > 0).Select(m => m.ToPoint()).ToHashSet());
-                Solver.MoveAndAttack(physicist, AI.PLAYER.Opponent.Units);
+                Solver.MoveAndAttack(physicist, this.Player.Opponent.Units);
 
                 if (!physicist.Acted)
                 {

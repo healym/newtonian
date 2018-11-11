@@ -88,7 +88,7 @@ namespace Joueur.cs.Games.Newtonian
             Move(unit, targets.Where(t => t.Tile != null).Select(t => t.Tile.ToPoint()).ToHashSet());
             if (Rules.CanAttack(unit))
             {
-                var enemy = unit.Tile.GetNeighbors().FirstOrDefault(t => t.Unit != null);
+                var enemy = unit.Tile.GetNeighbors().FirstOrDefault(t => t.Unit != null && targets.Contains(t.Unit));
                 if (enemy != null)
                 {
                     unit.Attack(enemy);
