@@ -116,7 +116,7 @@ namespace Joueur.cs.Games.Newtonian
         /// <returns>Represents if you want to end your turn. True means end your turn, False means to keep your turn going and re-call this function.</returns>
         public bool RunTurn()
         {
-            if (this.Game.CurrentTurn % 55 == 0)
+            if ((this.Game.CurrentTurn - 5) % 50 == 0)
             {
                 ClearUnitLogs();
             }
