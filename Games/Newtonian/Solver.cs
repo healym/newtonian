@@ -7,40 +7,6 @@ namespace Joueur.cs.Games.Newtonian
 {
     public static class Solver
     {
-        public static void RunPhysicist(Unit unit)
-        {
-            Move(unit, AI.GAME.Machines.Where(m => m.CanBeWorked()).Select(m => m.ToPoint()).ToHashSet());
-            Move(unit, AI.GAME.Machines.Where(m => m.Tile.Redium > 0 || m.Tile.Blueium > 0).Select(m => m.ToPoint()).ToHashSet());
-            MoveAndAttack(unit, AI.PLAYER.Opponent.Units);
-
-            if (!unit.Acted)
-            {
-                var machineTile = unit.Tile.GetNeighbors().FirstOrDefault(t => t.Machine != null && t.Machine.CanBeWorked());
-                if (machineTile != null)
-                {
-                    unit.Act(machineTile);
-                }
-            }
-        }
-
-        public static void RunManagers()
-        {
-            foreach (var manager in AI.PLAYER.Units.Where(u => u != null && u.Tile != null && u.Job == AI.MANAGER))
-            {
-                var goalTypes = new [] { AI.REDIUM, AI.BLUEIUM };
-                if (Rules.OpenCapacity(manager) > 0)
-                {
-                    MoveAndPickup(manager, AI.GAME.Tiles, goalTypes);
-                }
-
-                if (Rules.OpenCapacity(manager) == 0)
-                {
-                   MoveAndDrop(manager, AI.GAME.Tiles.Where(t => t.Type == "generator"), goalTypes);
-                }
-                MoveAndAttack(manager, AI.GAME.Units.Where(u => u.Owner != manager.Owner));
-            }
-        }
-
         public static IEnumerable<Point> GetPath(IEnumerable<Point> starts, Func<Point, bool> isGoal)
         {
             return new AStar<Point>(starts, isGoal, (a, b) => 1, p => 0, p =>

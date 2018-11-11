@@ -116,11 +116,8 @@ namespace Joueur.cs.Games.Newtonian
         public bool RunTurn()
         {
             RunInterns();
-            Solver.RunManagers();
-            foreach (var physicist in this.Player.Units.Where(u => u != null && u.Tile != null && u.Job == AI.PHYSICIST))
-            {
-                Solver.RunPhysicist(physicist);
-            }
+            RunManagers();
+            RunPhysicists();
 
             return true;
             // <<-- /Creer-Merge: runTurn -->>
@@ -172,6 +169,43 @@ namespace Joueur.cs.Games.Newtonian
                     }
                     Solver.MoveAndDrop(intern, AI.GAME.Machines.Where(m => m.OreType == machineType).Select(m => m.Tile), dropType.Singular());
                     Solver.MoveAndDrop(intern, AI.GAME.Machines.Where(m => m.OreType == machineType).Select(m => m.Tile), dropType.Singular());
+                }
+            }
+        }
+
+        public void RunManagers()
+        {
+            foreach (var manager in this.Player.Units.Where(u => u != null && u.Tile != null && u.Job == AI.MANAGER))
+            {
+                var goalTypes = new[] { AI.REDIUM, AI.BLUEIUM };
+                if (Rules.OpenCapacity(manager) > 0)
+                {
+                    Solver.MoveAndPickup(manager, AI.GAME.Tiles, goalTypes);
+                }
+
+                if (Rules.OpenCapacity(manager) == 0)
+                {
+                    Solver.MoveAndDrop(manager, AI.GAME.Tiles.Where(t => t.Type == "generator"), goalTypes);
+                }
+                Solver.MoveAndAttack(manager, AI.GAME.Units.Where(u => u.Owner != manager.Owner));
+            }
+        }
+
+        public void RunPhysicists()
+        {
+            foreach (var physicist in this.Player.Units.Where(u => u != null && u.Tile != null && u.Job == AI.PHYSICIST))
+            {
+                Solver.Move(physicist, AI.GAME.Machines.Where(m => m.CanBeWorked()).Select(m => m.ToPoint()).ToHashSet());
+                Solver.Move(physicist, AI.GAME.Machines.Where(m => m.Tile.Redium > 0 || m.Tile.Blueium > 0).Select(m => m.ToPoint()).ToHashSet());
+                Solver.MoveAndAttack(physicist, AI.PLAYER.Opponent.Units);
+
+                if (!physicist.Acted)
+                {
+                    var machineTile = physicist.Tile.GetNeighbors().FirstOrDefault(t => t.Machine != null && t.Machine.CanBeWorked());
+                    if (machineTile != null)
+                    {
+                        physicist.Act(machineTile);
+                    }
                 }
             }
         }
