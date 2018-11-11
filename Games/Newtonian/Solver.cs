@@ -149,6 +149,18 @@ namespace Joueur.cs.Games.Newtonian
             }
         }
 
+        public static void Work(Unit unit, IEnumerable<Machine> targets)
+        {
+            if (unit.Job == AI.PHYSICIST && !unit.Acted)
+            {
+                foreach (var target in targets.Where(t => t.CanBeWorked() && unit.Tile.HasNeighbor(t.Tile)))
+                {
+                    unit.Act(target.Tile);
+                    return;
+                }
+            }
+        }
+
         public static void Move(Unit unit, HashSet<Point> goalPoints)
         {
             if (unit.Moves == 0)
