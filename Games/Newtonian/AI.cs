@@ -44,6 +44,8 @@ namespace Joueur.cs.Games.Newtonian
 
         public static Machine CLOSEST_REDIUM;
         public static Machine CLOSEST_BLUEIUM;
+        public static Machine HARDEST_REDIUM;
+        public static Machine HARDEST_BLUEIUM;
         // <<-- /Creer-Merge: properties -->>
         #endregion
 
@@ -81,6 +83,8 @@ namespace Joueur.cs.Games.Newtonian
 
             AI.CLOSEST_REDIUM = Solver.FindNearest(this.Player.SpawnTiles.Select(t => t.ToPoint()), this.Game.Machines.Where(m => m.OreType == AI.REDIUM).Select(m => m.ToPoint())).First().ToTile().Machine;
             AI.CLOSEST_BLUEIUM = Solver.FindNearest(this.Player.SpawnTiles.Select(t => t.ToPoint()), this.Game.Machines.Where(m => m.OreType == AI.BLUEIUM).Select(m => m.ToPoint())).First().ToTile().Machine;
+            AI.HARDEST_REDIUM = Solver.FindNearest(this.Player.Opponent.SpawnTiles.Select(t => t.ToPoint()), this.Game.Machines.Where(m => m.OreType == AI.REDIUM).Select(m => m.ToPoint())).First().ToTile().Machine;
+            AI.HARDEST_BLUEIUM = Solver.FindNearest(this.Player.Opponent.SpawnTiles.Select(t => t.ToPoint()), this.Game.Machines.Where(m => m.OreType == AI.BLUEIUM).Select(m => m.ToPoint())).First().ToTile().Machine;
             // <<-- /Creer-Merge: start -->>
         }
 
@@ -269,7 +273,7 @@ namespace Joueur.cs.Games.Newtonian
                     guardMachines = AI.GAME.Machines.Where(m => m.Tile.RediumOre > 0 || m.Tile.BlueiumOre > 0);
                     if (!guardMachines.Any())
                     {
-                        guardMachines = AI.GAME.Machines;
+                        guardMachines = ((this.Player == this.Game.Players[0]) ? AI.CLOSEST_BLUEIUM : AI.CLOSEST_REDIUM).Singular();
                     }
                 }
                 Solver.Move(manager, guardMachines.SelectMany(m => m.Tile.GetNeighbors().Where(t => t.IsPathable() || t.Unit != null && t.Unit.Owner != manager.Owner)).Select(t => t.ToPoint()).ToHashSet());
@@ -318,7 +322,8 @@ namespace Joueur.cs.Games.Newtonian
                     targets = AI.GAME.Machines.Where(m => m.Tile.RediumOre > 0 || m.Tile.BlueiumOre > 0).SelectMany(m => m.ToPoint().GetNeighbors());
                     if (!targets.Any())
                     {
-                        targets = AI.GAME.Machines.SelectMany(m => m.ToPoint().GetNeighbors());
+
+                        targets = ((this.Player == this.Game.Players[0]) ? AI.CLOSEST_BLUEIUM : AI.CLOSEST_REDIUM).ToPoint().GetNeighbors();
                     }
                 }
                 Solver.Move(physicist, targets.ToHashSet());
