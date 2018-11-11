@@ -153,7 +153,7 @@ namespace Joueur.cs.Games.Newtonian
         {
             if (unit.Job == AI.PHYSICIST && !unit.Acted)
             {
-                foreach (var target in targets.Where(t => t.CanBeWorked()))
+                foreach (var target in targets.Where(t => t.CanBeWorked() && unit.Tile.HasNeighbor(t.Tile)))
                 {
                     unit.Act(target.Tile);
                     return;
