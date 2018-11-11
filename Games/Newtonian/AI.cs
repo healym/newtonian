@@ -158,32 +158,21 @@ namespace Joueur.cs.Games.Newtonian
                 }
 
                 Solver.MoveAndPickup(intern, AI.GAME.Tiles.Where(t => t.Machine == null), oreTypes);
+                Solver.MoveAndPickup(intern, AI.GAME.Tiles.Where(t => t.Machine == null), oreTypes);
+                Solver.MoveAndPickup(intern, AI.GAME.Tiles.Where(t => t.Machine == null), oreTypes);
+                Solver.MoveAndPickup(intern, AI.GAME.Tiles.Where(t => t.Machine == null), oreTypes);
 
-                if (Rules.OpenCapacity(intern) == 0)
+                if (intern.GetAmount(oreTypes) > 0)
                 {
                     var dropType = intern.RediumOre > intern.BlueiumOre ? AI.REDIUMORE : AI.BLUEIUMORE;
-                    var generatorType = intern.RediumOre > intern.BlueiumOre ? AI.REDIUM : AI.BLUEIUM;
-
-                    var goalMachines = AI.GAME.Machines.Where(m => m.OreType == generatorType && m.Tile.GetAmount(dropType) < m.RefineInput);
-                    if (!goalMachines.Any())
+                    var machineType = intern.RediumOre > intern.BlueiumOre ? AI.REDIUM : AI.BLUEIUM;
+                    var machines = AI.GAME.Machines.Where(m => m.OreType == machineType && !m.CanBeWorked());
+                    if (machines.Count() == 0)
                     {
-                        goalMachines = AI.GAME.Machines.Where(m => m.OreType == generatorType);
+                        machines = AI.GAME.Machines.Where(m => m.OreType == machineType);
                     }
-                    var goalPoints = goalMachines.Select(t => t.ToPoint()).ToHashSet();
-                    var path = Solver.GetPath(intern.ToPoint().Singular(), (p => goalPoints.Contains(p)));
-                    if (path != null && path.Count() > 0)
-                    {
-                        
-                        foreach (Point step in path.Skip(1).SkipLast(1).Take(intern.Moves))
-                        {
-                            intern.Move(step.ToTile());
-                        }
-                        var dropTile = path.Last().ToTile();
-                        if (intern.Tile == dropTile || intern.Tile.HasNeighbor(dropTile))
-                        {
-                            intern.Drop(dropTile, 0, dropType);
-                        }
-                    }
+                    Solver.MoveAndDrop(intern, AI.GAME.Machines.Where(m => m.OreType == machineType).Select(m => m.Tile), dropType.Singular());
+                    Solver.MoveAndDrop(intern, AI.GAME.Machines.Where(m => m.OreType == machineType).Select(m => m.Tile), dropType.Singular());
                 }
             }
         }

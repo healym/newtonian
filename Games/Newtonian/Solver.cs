@@ -104,6 +104,7 @@ namespace Joueur.cs.Games.Newtonian
             {
                 return;
             }
+            Console.WriteLine("MoveAndPickup {0}->{1} {2}", unit.ToPoint(), tiles.Count(), String.Join(",", oreTypes));
 
             var goalPoints = tiles.Where(t => t.GetAmount(oreTypes) > 0).Select(t => t.ToPoint()).ToHashSet();
 
@@ -127,6 +128,41 @@ namespace Joueur.cs.Games.Newtonian
                     if (pickup.GetAmount(oreType) > 0 && unit.OpenCapacity() > 0)
                     {
                         unit.Pickup(pickup, 0, oreType);
+                    }
+                }
+            }
+        }
+
+        public static void MoveAndDrop(Unit unit, IEnumerable<Tile> tiles, IEnumerable<string> oreTypes)
+        {
+            if (unit.GetAmount(oreTypes) == 0)
+            {
+                return;
+            }
+            Console.WriteLine("MoveAndDrop {0}->{1} {2}", unit.ToPoint(), tiles.Count(), String.Join(",", oreTypes));
+
+            var goalPoints = tiles.Select(t => t.ToPoint()).ToHashSet();
+
+            if (unit.Moves > 0)
+            {
+                var path = GetPath(unit.ToPoint().Singular(), (p => goalPoints.Contains(p)));
+                if (path.Count() > 2)
+                {
+                    foreach (Point step in path.Skip(1).SkipLast(1).Take(unit.Moves))
+                    {
+                        unit.Move(step.ToTile());
+                    }
+                }
+            }
+
+            var goalsInRange = unit.Tile.GetInRange().Where(t => goalPoints.Contains(t.ToPoint()));
+            foreach (var drop in goalsInRange)
+            {
+                foreach (var oreType in oreTypes)
+                {
+                    if (unit.GetAmount(oreType) > 0)
+                    {
+                        unit.Drop(drop, 0, oreType);
                     }
                 }
             }
