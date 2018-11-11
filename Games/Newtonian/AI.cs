@@ -115,12 +115,25 @@ namespace Joueur.cs.Games.Newtonian
         /// <returns>Represents if you want to end your turn. True means end your turn, False means to keep your turn going and re-call this function.</returns>
         public bool RunTurn()
         {
+            ClearUnitLogs();
+            LogEnemies();
             RunInterns();
-            RunManagers();
             RunPhysicists();
+            RunManagers();
 
             return true;
             // <<-- /Creer-Merge: runTurn -->>
+        }
+
+        public void LogEnemies()
+        {
+            return;
+            //AI.GAME.Units.Where(u => u.Job == AI.INTERN).ForEach()
+        }
+
+        public void ClearUnitLogs()
+        {
+            AI.GAME.Units.ForEach(u => u.Log(""));
         }
 
         public void RunInterns()
@@ -202,7 +215,18 @@ namespace Joueur.cs.Games.Newtonian
                 {
                     Solver.MoveAndDrop(manager, this.Player.GeneratorTiles, goalTypes);
                 }
-                Solver.MoveAndAttack(manager, this.Player.Opponent.Units);
+                var workingMachines = AI.GAME.Machines.Where(m => m.Tile.RediumOre > 0 || m.Tile.BlueiumOre > 0);
+                Solver.Move(manager, workingMachines.SelectMany(m => m.Tile.ToPoint().GetDiagonals()).Where(p => p.ToTile().IsPathable() || p.ToTile().Unit != null).ToHashSet());
+                Solver.Attack(manager, this.Player.Opponent.Units);
+                Congratulate(manager);
+            }
+        }
+
+        public void Congratulate(Unit m)
+        {
+            if (m.Tile.GetNeighbors().Any(t => t.Unit != null && t.Unit.Job == AI.PHYSICIST && t.Unit.Acted && t.Unit.Owner == m.Owner))
+            {
+                m.Log("Keep up the good work!");
             }
         }
 
