@@ -172,6 +172,30 @@ namespace Joueur.cs.Games.Newtonian
             }
         }
 
+        public static void GhostMove(Unit unit, HashSet<Point> goalPoints)
+        {
+            if (unit.Moves == 0)
+            {
+                return;
+            }
+
+            var path = GetGhostPath(unit.ToPoint().Singular(), (p => goalPoints.Contains(p)));
+            if (path.Count() > 2)
+            {
+                foreach (Point step in path.Skip(1).SkipLast(1).Take(unit.Moves))
+                {
+                    if (step.ToTile().IsPathable())
+                    {
+                        unit.Move(step.ToTile());
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+            }
+        }
+
         public static void Pickup(Unit unit, IEnumerable<string> oreTypes)
         {
             foreach (var pickup in unit.Tile.GetInRange())
@@ -205,6 +229,14 @@ namespace Joueur.cs.Games.Newtonian
             return new AStar<Point>(starts, isGoal, (a, b) => 1, p => 0, p =>
             {
                 return p.GetNeighbors().Where(n => n.ToTile().IsPathable() || isGoal(n));
+            }).Path;
+        }
+
+        public static IEnumerable<Point> GetGhostPath(IEnumerable<Point> starts, Func<Point, bool> isGoal)
+        {
+            return new AStar<Point>(starts, isGoal, (a, b) => 1, p => 0, p =>
+            {
+                return p.GetNeighbors().Where(n => n.ToTile().IsPathable() || n.ToTile().Unit != null || isGoal(n));
             }).Path;
         }
 
