@@ -276,7 +276,7 @@ namespace Joueur.cs.Games.Newtonian
                     Solver.MoveAndPickup(manager, AI.GAME.Tiles, goalTypes);
                 }
 
-                if (Rules.OpenCapacity(manager) < AI.MANAGER.CarryLimit)
+                if (manager.GetAmount(goalTypes) > 0)
                 {
                     Solver.MoveAndDrop(manager, this.Player.GeneratorTiles, goalTypes);
                 }
