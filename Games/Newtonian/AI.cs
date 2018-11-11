@@ -137,6 +137,7 @@ namespace Joueur.cs.Games.Newtonian
                 Solver.Stun(unit, this.Player.Opponent.Units);
                 Solver.Attack(unit, this.Player.Opponent.Units);
             }
+            CleanupPhysicists();
             CleanupCleanupEverybodyEverywhere();
             return true;
             // <<-- /Creer-Merge: runTurn -->>
@@ -341,6 +342,25 @@ namespace Joueur.cs.Games.Newtonian
                     }
                 }
             }
+        }
+
+        public void CleanupPhysicists()
+        {
+            foreach (var physicist in this.Player.Units.Where(u => u.Job == AI.PHYSICIST))
+            {
+                var neighborMachine = physicist.NeighborMachines().FirstOrDefault();
+                while (neighborMachine != null && neighborMachine.OreType == AI.REDIUM && physicist.Tile.GetAmount(AI.REDIUM) > 0 && physicist.OpenCapacity() > 0)
+                {
+                    physicist.Pickup(physicist.Tile, -1, AI.REDIUM);
+                    physicist.Drop(neighborMachine.Tile, -1, AI.REDIUM);
+                }
+                while (neighborMachine != null && neighborMachine.OreType == AI.BLUEIUM && physicist.Tile.GetAmount(AI.BLUEIUM) > 0 && physicist.OpenCapacity() > 0)
+                {
+                    physicist.Pickup(physicist.Tile, -1, AI.BLUEIUM);
+                    physicist.Drop(neighborMachine.Tile, -1, AI.BLUEIUM);
+                }
+            }
+            return;
         }
 
         public void CleanupCleanupEverybodyEverywhere()
