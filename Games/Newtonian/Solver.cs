@@ -83,6 +83,7 @@ namespace Joueur.cs.Games.Newtonian
                     }
                 }
             }
+            unit.Log(unit.FullCapacity().ToString());
         }
 
         public static void MoveAndDrop(Unit unit, IEnumerable<Tile> tiles, IEnumerable<string> oreTypes)
@@ -190,6 +191,19 @@ namespace Joueur.cs.Games.Newtonian
                 return p.GetNeighbors().Where(n => n.ToTile().IsPathable() || n.ToTile().Unit != null || goalSet.Contains(n));
             });
             return goals.Where(g => search.GScore.ContainsKey(g)).OrderBy(g => search.GScore[g]);
+        }
+
+        public static IEnumerable<Point> ShortestPath(IEnumerable<Point> starts, IEnumerable<Point> goals)
+        {
+            var goalSet = goals.ToHashSet();
+            return new AStar<Point>(starts, p => goalSet.Contains(p), (p1, p2) => 1, p => 0, p =>
+            {
+                if (goalSet.Contains(p) && !p.ToTile().IsPathable())
+                {
+                    return Enumerable.Empty<Point>();
+                }
+                return p.GetNeighbors().Where(n => n.ToTile().IsPathable() || goalSet.Contains(n));
+            }).Path;
         }
     }
 }

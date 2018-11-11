@@ -116,14 +116,8 @@ namespace Joueur.cs.Games.Newtonian
         /// <returns>Represents if you want to end your turn. True means end your turn, False means to keep your turn going and re-call this function.</returns>
         public bool RunTurn()
         {
-            if ((this.Game.CurrentTurn - 5) % 50 == 0)
-            {
-                ClearUnitLogs();
-            }
-            if (this.Game.CurrentTurn % 50 == 0)
-            {
-                LogEnemies();
-            }
+            LogInventories();
+
             RunInterns();
             RunPhysicists();
             RunManagers();
@@ -135,70 +129,6 @@ namespace Joueur.cs.Games.Newtonian
 
             return true;
             // <<-- /Creer-Merge: runTurn -->>
-        }
-
-        public void LogEnemies()
-        {
-            var interns = AI.GAME.Units.Where(u => u.Job == AI.INTERN).ToArray();
-            var phys = AI.GAME.Units.Where(u => u.Job == AI.PHYSICIST).ToArray();
-            var mans = AI.GAME.Units.Where(u => u.Job == AI.MANAGER).ToArray();
-            var ri = RANDOM.Next(Math.Min(interns.Count(), Math.Min(phys.Count(), Math.Min(mans.Count(), 3))));
-            for (var i = 0; i < ri; i++)
-            {
-                var randIntern = RANDOM.Next(interns.Count());
-                LogIntern(interns[randIntern]);
-            }
-
-            for (var i = 0; i < ri; i++)
-            {
-                var randPhys = RANDOM.Next(interns.Count());
-                LogPhysicist(phys[randPhys]);
-            }
-
-            for (var i = 0; i < ri; i++)
-            {
-                var randMan = RANDOM.Next(mans.Count());
-                LogIntern(mans[randMan]);
-            }
-        }
-
-        public void LogIntern(Unit u)
-        {
-            string[] internSayings = { "I should be in charge of this dump.",
-                                       "I wonder how much free coffee I can drink in a day.",
-                                       "What does '360 wellness' even mean??",
-                                       "Do you think anybody's noticed that I haven't figured out Git yet?"};
-            int r = RANDOM.Next(internSayings.Count());
-            u.Log(internSayings[r]);
-            return;
-        }
-
-        public void LogPhysicist(Unit u)
-        {
-            string[] physSayings = { "Morning, Mr. Freeman",
-                                     "If the Silver Surfer and Iron Man team up, they'd be Alloys.",
-                                     ""};
-            int r = RANDOM.Next(physSayings.Count());
-            u.Log(physSayings[r]);
-            return;
-        }
-
-        public void LogManager(Unit u)
-        {
-            string[] manSayings = { "hurr durr",
-                                    "pbbbbbbbtttt",
-                                    "We make such a good team",
-                                    "Remember your 360 wellness!",
-                                    "Investigations hurt science.",
-                                    "Lotta good synergy in here!" };
-            int r = RANDOM.Next(manSayings.Count());
-            u.Log(manSayings[r]);
-            return;
-        }
-
-        public void ClearUnitLogs()
-        {
-            AI.GAME.Units.ForEach(u => u.Log(""));
         }
 
         public void RunInterns()
@@ -268,15 +198,30 @@ namespace Joueur.cs.Games.Newtonian
 
         public void RunManagers()
         {
-            foreach (var manager in this.Player.Units.Where(u => u != null && u.Tile != null && u.StunTime == 0 && u.Job == AI.MANAGER))
-            {
-                var goalTypes = new[] { AI.REDIUM, AI.BLUEIUM };
-                if (Rules.OpenCapacity(manager) > 0)
-                {
-                    Solver.MoveAndPickup(manager, AI.GAME.Tiles, goalTypes);
-                }
+            var goalTypes = new[] { AI.REDIUM, AI.BLUEIUM };
 
-                if (manager.GetAmount(goalTypes) > 0)
+            List<Unit> allManagers = this.Player.Units.Where(u => u != null && u.Tile != null && u.StunTime == 0 && u.Job == AI.MANAGER).ToList();
+            var mules = allManagers.Where(m => m.FullCapacity() == 0).ToList();
+            var orentTiles = this.Game.Tiles.Where(t => t.Redium > 0 || t.Blueium > 0).ToList();
+            while (orentTiles.Any())
+            {
+                // assign close managers
+                var shortestPath = Solver.ShortestPath(mules.Select(m => m.Tile.ToPoint()), orentTiles.Select(t => t.ToPoint()));
+                if (shortestPath.Count() < 2)
+                {
+                    break;
+                }
+                var closestManager = shortestPath.First().ToTile().Unit;
+                var orentTile = shortestPath.Last().ToTile();
+                Solver.MoveAndPickup(closestManager, orentTile.Singular().ToHashSet(), goalTypes);
+                allManagers.Remove(closestManager);
+                mules.Remove(closestManager);
+                orentTiles.Remove(orentTile);
+                Congratulate(closestManager);
+            }
+            foreach (var manager in allManagers)
+            {
+                if (manager.FullCapacity() > 0)
                 {
                     Solver.MoveAndDrop(manager, this.Player.GeneratorTiles, goalTypes);
                 }
@@ -320,6 +265,74 @@ namespace Joueur.cs.Games.Newtonian
                 Solver.Move(physicist, targets.ToHashSet());
                 Solver.Work(physicist, AI.GAME.Machines);
             }
+        }
+
+        public void LogInventories()
+        {
+            AI.PLAYER.Units.ForEach(u => u.Log(u.FullCapacity().ToString()));
+        }
+        public void LogEnemies()
+        {
+            var interns = AI.GAME.Units.Where(u => u.Job == AI.INTERN).ToArray();
+            var phys = AI.GAME.Units.Where(u => u.Job == AI.PHYSICIST).ToArray();
+            var mans = AI.GAME.Units.Where(u => u.Job == AI.MANAGER).ToArray();
+            var ri = RANDOM.Next(Math.Min(interns.Count(), Math.Min(phys.Count(), Math.Min(mans.Count(), 3))));
+            for (var i = 0; i < ri; i++)
+            {
+                var randIntern = RANDOM.Next(interns.Count());
+                LogIntern(interns[randIntern]);
+            }
+
+            for (var i = 0; i < ri; i++)
+            {
+                var randPhys = RANDOM.Next(interns.Count());
+                LogPhysicist(phys[randPhys]);
+            }
+
+            for (var i = 0; i < ri; i++)
+            {
+                var randMan = RANDOM.Next(mans.Count());
+                LogIntern(mans[randMan]);
+            }
+        }
+
+        public void LogIntern(Unit u)
+        {
+            string[] internSayings = { "I should be in charge of this dump.",
+                                       "I wonder how much free coffee I can drink in a day.",
+                                       "What does '360 wellness' even mean??",
+                                       "Do you think anybody's noticed that I haven't figured out Git yet?"};
+            int r = RANDOM.Next(internSayings.Count());
+            u.Log(internSayings[r]);
+            return;
+        }
+
+        public void LogPhysicist(Unit u)
+        {
+            string[] physSayings = { "Morning, Mr. Freeman",
+                                     "If the Silver Surfer and Iron Man team up, they'd be Alloys.",
+                                     ""};
+            int r = RANDOM.Next(physSayings.Count());
+            u.Log(physSayings[r]);
+            return;
+        }
+
+        public void LogManager(Unit u)
+        {
+            string[] manSayings = { "hurr durr",
+                                    "pbbbbbbbtttt",
+                                    "We make such a good team",
+                                    "Remember your 360 wellness!",
+                                    "Investigations hurt science.",
+                                    "Lotta good synergy in here!" };
+            int r = RANDOM.Next(manSayings.Count());
+            u.Log(manSayings[r]);
+            return;
+        }
+
+        public void ClearUnitLogs()
+        {
+            AI.GAME.Units.ForEach(u => u.Log(""));
         }
 
         // <<-- Creer-Merge: methods -->> - Code you add between this comment and the end comment will be preserved between Creer re-runs.

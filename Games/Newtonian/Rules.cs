@@ -69,6 +69,11 @@ namespace Joueur.cs.Games.Newtonian
             return u.Job.CarryLimit - (u.Blueium + u.BlueiumOre + u.Redium + u.RediumOre);
         }
 
+        public static int FullCapacity(this Unit u)
+        {
+            return u.Blueium + u.BlueiumOre + u.Redium + u.RediumOre;
+        }
+
         public static bool CanSabotageMachine(this Unit saboteur, Machine target)
         {
             return false;
