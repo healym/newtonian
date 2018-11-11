@@ -11,7 +11,7 @@ namespace Joueur.cs.Games.Newtonian
         {
             Move(unit, AI.GAME.Machines.Where(m => m.CanBeWorked()).Select(m => m.ToPoint()).ToHashSet());
             Move(unit, AI.GAME.Machines.Where(m => m.Tile.Redium > 0 || m.Tile.Blueium > 0).Select(m => m.ToPoint()).ToHashSet());
-            Move(unit, AI.GAME.Machines.Where(m => m.Tile.GetNeighbors().All(t => t.Unit == null)).Select(m => m.ToPoint()).ToHashSet());
+            MoveAndAttack(unit, AI.PLAYER.Opponent.Units);
 
             if (!unit.Acted)
             {
