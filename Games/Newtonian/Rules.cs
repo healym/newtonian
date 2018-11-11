@@ -7,9 +7,9 @@ namespace Joueur.cs.Games.Newtonian
 {
     public static class Rules
     {
-        public static bool CanAttack(this Unit attacker, Unit target)
+        public static bool CanAttack(this Unit attacker)
         {
-            return !attacker.Acted && attacker.Tile.HasNeighbor(target.Tile);
+            return !attacker.Acted && attacker.Moves >= attacker.Job.Moves;
         }
 
         public static bool CanStun(Job stunner, Job target)

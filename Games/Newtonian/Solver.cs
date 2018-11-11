@@ -86,12 +86,14 @@ namespace Joueur.cs.Games.Newtonian
         public static void MoveAndAttack(Unit unit, IEnumerable<Unit> targets)
         {
             Move(unit, targets.Where(t => t.Tile != null).Select(t => t.Tile.ToPoint()).ToHashSet());
-            var enemy = unit.Tile.GetNeighbors().FirstOrDefault(t => t.Unit != null);
-            if (enemy != null)
+            if (Rules.CanAttack(unit))
             {
-                unit.Attack(enemy);
+                var enemy = unit.Tile.GetNeighbors().FirstOrDefault(t => t.Unit != null);
+                if (enemy != null)
+                {
+                    unit.Attack(enemy);
+                }
             }
-
         }
 
         public static void Move(Unit unit, HashSet<Point> goalPoints)
