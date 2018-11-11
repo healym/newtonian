@@ -120,7 +120,7 @@ namespace Joueur.cs.Games.Newtonian
             {
                 ClearUnitLogs();
             }
-            if (this.Game.CurrentTurn != 0 && this.Game.CurrentTurn % 50 == 0)
+            if (this.Game.CurrentTurn % 50 == 0)
             {
                 LogEnemies();
             }
