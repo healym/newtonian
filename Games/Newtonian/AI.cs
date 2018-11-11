@@ -126,7 +126,7 @@ namespace Joueur.cs.Games.Newtonian
                 Solver.Stun(unit, this.Player.Opponent.Units);
                 Solver.Attack(unit, this.Player.Opponent.Units);
             }
-
+            CleanupCleanupEverybodyEverywhere();
             return true;
             // <<-- /Creer-Merge: runTurn -->>
         }
@@ -264,6 +264,39 @@ namespace Joueur.cs.Games.Newtonian
                 }
                 Solver.Move(physicist, targets.ToHashSet());
                 Solver.Work(physicist, AI.GAME.Machines);
+
+                // Don't block machines, pickup and drop Oren't
+                foreach (Machine neighbor in physicist.NeighborMachines())
+                {
+                    if (neighbor.IsBlocked() && neighbor.GetAmount(neighbor.OreType) > 0)
+                    {
+                        physicist.Pickup(neighbor.Tile, -1, neighbor.OreType);
+                        physicist.Drop(physicist.Tile, -1, neighbor.OreType);
+                    }
+                }
+            }
+        }
+
+        public void CleanupCleanupEverybodyEverywhere()
+        {
+            foreach (var unit in this.Player.Units.Where(u => u != null && u.Tile != null && u.StunTime == 0))
+            {
+                if (unit.GetAmount(AI.REDIUM) > 0)
+                {
+                    unit.Pickup(unit.Tile, -1, AI.REDIUM);
+                }
+                if (unit.GetAmount(AI.BLUEIUM) > 0)
+                {
+                    unit.Pickup(unit.Tile, -1, AI.BLUEIUM);
+                }
+                if (unit.GetAmount(AI.REDIUMORE) > 0)
+                {
+                    unit.Pickup(unit.Tile, -1, AI.REDIUMORE);
+                }
+                if (unit.GetAmount(AI.BLUEIUMORE) > 0)
+                {
+                    unit.Pickup(unit.Tile, -1, AI.BLUEIUMORE);
+                }
             }
         }
 

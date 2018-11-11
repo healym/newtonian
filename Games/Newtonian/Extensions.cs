@@ -131,6 +131,8 @@ namespace Joueur.cs.Games.Newtonian
             return oreTypes.Sum(o => tile.GetAmount(o));
         }
 
+
+
         public static int GetAmount(this Unit unit, string oreType)
         {
             switch (oreType)
@@ -150,6 +152,16 @@ namespace Joueur.cs.Games.Newtonian
         public static int GetAmount(this Unit unit, IEnumerable<string> oreTypes)
         {
             return oreTypes.Sum(o => unit.GetAmount(o));
+        }
+
+        public static int GetAmount(this Machine machine, IEnumerable<string> oreTypes)
+        {
+            return oreTypes.Sum(o => machine.GetAmount(o));
+        }
+
+        public static int GetAmount(this Machine machine, string oreType)
+        {
+            return machine.Tile.GetAmount(oreType);
         }
 
         public static IEnumerable<Tile> GetInRange(this Tile tile)

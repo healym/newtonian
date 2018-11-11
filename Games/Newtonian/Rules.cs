@@ -79,6 +79,16 @@ namespace Joueur.cs.Games.Newtonian
             return false;
         }
 
+        public static bool IsBlocked(this Machine machine)
+        {
+           return  !machine.Tile.GetNeighbors().Where(t => !t.IsPathable()).Any();
+        }
+
+        public static IEnumerable<Machine> NeighborMachines(this Unit unit)
+        {
+            return unit.Tile.GetNeighbors().Where(t => t.Machine != null).Select(t => t.Machine);
+        }
+
 
     }
 }
