@@ -116,8 +116,8 @@ namespace Joueur.cs.Games.Newtonian
         public bool RunTurn()
         {
             RunInterns();
-            RunManagers();
             RunPhysicists();
+            RunManagers();
 
             return true;
             // <<-- /Creer-Merge: runTurn -->>
