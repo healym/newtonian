@@ -25,18 +25,19 @@ namespace Joueur.cs.Games.Newtonian
 
         public static void RunManagers()
         {
-            foreach (var u in AI.PLAYER.Units.Where(u => u != null && u.Tile != null && u.Job == AI.MANAGER))
+            foreach (var manager in AI.PLAYER.Units.Where(u => u != null && u.Tile != null && u.Job == AI.MANAGER))
             {
                 var goalTypes = new [] { AI.REDIUM, AI.BLUEIUM };
-                if (Rules.OpenCapacity(u) > 0)
+                if (Rules.OpenCapacity(manager) > 0)
                 {
-                    MoveAndPickup(u, AI.GAME.Tiles, goalTypes);
+                    MoveAndPickup(manager, AI.GAME.Tiles, goalTypes);
                 }
 
-                if (Rules.OpenCapacity(u) == 0)
+                if (Rules.OpenCapacity(manager) == 0)
                 {
-                   MoveAndDrop(u, AI.GAME.Tiles.Where(t => t.Type == "generator"), goalTypes);
+                   MoveAndDrop(manager, AI.GAME.Tiles.Where(t => t.Type == "generator"), goalTypes);
                 }
+                MoveAndAttack(manager, AI.GAME.Units.Where(u => u.Owner != manager.Owner));
             }
         }
 
@@ -114,6 +115,17 @@ namespace Joueur.cs.Games.Newtonian
                     }
                 }
             }
+        }
+
+        public static void MoveAndAttack(Unit unit, IEnumerable<Unit> targets)
+        {
+            Move(unit, targets.Select(t => t.Tile.ToPoint()).ToHashSet());
+            var enemy = unit.Tile.GetNeighbors().FirstOrDefault(t => t.Unit != null && t.Unit.Owner != unit.Owner);
+            if (enemy != null)
+            {
+                unit.Attack(enemy);
+            }
+
         }
 
         public static void Move(Unit unit, HashSet<Point> goalPoints)
