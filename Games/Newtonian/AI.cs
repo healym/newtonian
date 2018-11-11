@@ -127,7 +127,7 @@ namespace Joueur.cs.Games.Newtonian
             RunInterns();
             RunPhysicists();
             RunManagers();
-            foreach (var unit in this.Player.Units.Where(u => u != null && u.Tile != null))
+            foreach (var unit in this.Player.Units.Where(u => u != null && u.Tile != null && u.StunTime == 0))
             {
                 Solver.Stun(unit, this.Player.Opponent.Units);
                 Solver.Attack(unit, this.Player.Opponent.Units);
@@ -183,7 +183,7 @@ namespace Joueur.cs.Games.Newtonian
 
         public void RunInterns()
         {
-            foreach (var intern in this.Player.Units.Where(u => u != null && u.Tile != null && u.Job == AI.INTERN))
+            foreach (var intern in this.Player.Units.Where(u => u != null && u.Tile != null && u.StunTime == 0 && u.Job == AI.INTERN))
             {
                 IEnumerable<string> oreTypes = new[] { AI.BLUEIUMORE, AI.REDIUMORE };
 
@@ -248,7 +248,7 @@ namespace Joueur.cs.Games.Newtonian
 
         public void RunManagers()
         {
-            foreach (var manager in this.Player.Units.Where(u => u != null && u.Tile != null && u.Job == AI.MANAGER))
+            foreach (var manager in this.Player.Units.Where(u => u != null && u.Tile != null && u.StunTime == 0 && u.Job == AI.MANAGER))
             {
                 var goalTypes = new[] { AI.REDIUM, AI.BLUEIUM };
                 if (Rules.OpenCapacity(manager) > 0)
@@ -286,7 +286,7 @@ namespace Joueur.cs.Games.Newtonian
 
         public void RunPhysicists()
         {
-            foreach (var physicist in this.Player.Units.Where(u => u != null && u.Tile != null && u.Job == AI.PHYSICIST))
+            foreach (var physicist in this.Player.Units.Where(u => u != null && u.Tile != null && u.StunTime == 0 && u.Job == AI.PHYSICIST))
             {
                 IEnumerable<Point> targets = AI.GAME.Machines.Where(m => m.CanBeWorked()).Select(m => m.ToPoint());
                 if (!targets.Any())
