@@ -29,7 +29,7 @@ namespace Joueur.cs.Games.Newtonian
 
         public static void RunManagers()
         {
-            foreach (var u in this.Player.Units.Where(u => u != null && u.Tile != null && u.Job == AI.MANAGER))
+            foreach (var u in AI.PLAYER.Units.Where(u => u != null && u.Tile != null && u.Job == AI.MANAGER))
             {
                 var goalTypes = new [] { AI.REDIUM, AI.BLUEIUM };
                 if (Rules.OpenCapacity(u) > 0)
