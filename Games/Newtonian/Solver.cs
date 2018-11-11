@@ -7,23 +7,19 @@ namespace Joueur.cs.Games.Newtonian
 {
     public static class Solver
     {
-        public static void RunPhysicist(Unit unit, IEnumerable<Machine> machines)
+        public static void RunPhysicist(Unit unit)
         {
-            var goals = machines.Where(m => Rules.CanBeWorked(m) && m.Tile.GetNeighbors().All(t => t.Unit == null || t.Unit.Job != AI.PHYSICIST || t.Unit.Owner != AI.PLAYER)).Select(m => m.ToPoint()).ToHashSet();
-            var path = GetPath(unit.ToPoint().Singular(), p => goals.Contains(p)).ToArray();
-            if (path != null && path.Length > 2)
-            {
-                path.Skip(1).SkipLast(1).Take(unit.Moves).ForEach(p => unit.Move(p.ToTile()));
-            }
+            Move(unit, AI.GAME.Machines.Where(m => m.CanBeWorked()).Select(m => m.ToPoint()).ToHashSet());
+            Move(unit, AI.GAME.Machines.Where(m => m.Tile.Redium > 0 || m.Tile.Blueium > 0).Select(m => m.ToPoint()).ToHashSet());
+            Move(unit, AI.GAME.Machines.Where(m => m.Tile.GetNeighbors().All(t => t.Unit == null)).Select(m => m.ToPoint()).ToHashSet());
 
-            if (unit.Acted)
+            if (!unit.Acted)
             {
-                return;
-            }
-            var target = unit.Tile.GetNeighbors().FirstOrDefault(t => t.Machine != null && Rules.CanBeWorked(t.Machine));
-            if (target != null)
-            {
-                unit.Act(target);
+                var machineTile = unit.Tile.GetNeighbors().FirstOrDefault(t => t.Machine != null && t.Machine.CanBeWorked());
+                if (machineTile != null)
+                {
+                    unit.Act(machineTile);
+                }
             }
         }
 
@@ -78,7 +74,6 @@ namespace Joueur.cs.Games.Newtonian
             {
                 return;
             }
-            Console.WriteLine("MoveAndPickup {0}->{1} {2}", unit.ToPoint(), tiles.Count(), String.Join(",", oreTypes));
 
             var goalPoints = tiles.Where(t => t.GetAmount(oreTypes) > 0).Select(t => t.ToPoint()).ToHashSet();
 
@@ -103,7 +98,6 @@ namespace Joueur.cs.Games.Newtonian
             {
                 return;
             }
-            Console.WriteLine("MoveAndDrop {0}->{1} {2}", unit.ToPoint(), tiles.Count(), String.Join(",", oreTypes));
 
             var goalPoints = tiles.Select(t => t.ToPoint()).ToHashSet();
 
