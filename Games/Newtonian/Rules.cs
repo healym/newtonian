@@ -7,7 +7,7 @@ namespace Joueur.cs.Games.Newtonian
 {
     public static class Rules
     {
-        public static bool CanAttack(Unit attacker, Unit target)
+        public static bool CanAttack(this Unit attacker, Unit target)
         {
             return !attacker.Acted && attacker.Tile.HasNeighbor(target.Tile);
         }
@@ -19,7 +19,7 @@ namespace Joueur.cs.Games.Newtonian
                 || (stunner == AI.MANAGER && target == AI.INTERN);
         }
 
-        public static bool CanBeWorked(Machine m)
+        public static bool CanBeWorked(this Machine m)
         {
             if (m.Worked > 0)
             {
@@ -35,17 +35,17 @@ namespace Joueur.cs.Games.Newtonian
             }
         }
 
-        public static bool CanHeal(Unit u)
+        public static bool CanHeal(this Unit u)
         {
             return u.Tile.Owner == u.Owner;
         }
 
-        public static bool CanPickup(Unit u)
+        public static bool CanPickup(this Unit u)
         {
             return OpenCapacity(u) > 0 && IsNextToResources(u);
         }
 
-        public static bool IsNextToResources(Unit u)
+        public static bool IsNextToResources(this Unit u)
         {
             if (u.Job == AI.INTERN || u.Job == AI.PHYSICIST)
             {
@@ -64,12 +64,12 @@ namespace Joueur.cs.Games.Newtonian
             return false;
         }
 
-        public static int OpenCapacity(Unit u)
+        public static int OpenCapacity(this Unit u)
         {
             return u.Job.CarryLimit - (u.Blueium + u.BlueiumOre + u.Redium + u.RediumOre);
         }
 
-        public static bool CanSabotageMachine(Unit saboteur, Machine target)
+        public static bool CanSabotageMachine(this Unit saboteur, Machine target)
         {
             return false;
         }

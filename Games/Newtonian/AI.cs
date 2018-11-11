@@ -133,41 +133,31 @@ namespace Joueur.cs.Games.Newtonian
         {
             foreach (var intern in this.Player.Units.Where(u => u != null && u.Tile != null && u.Job == AI.INTERN))
             {
-                if (Rules.OpenCapacity(intern) > 0)
+                IEnumerable<string> oreTypes = new[] { AI.BLUEIUMORE, AI.REDIUMORE };
+                if (intern.RediumOre != 0 && intern.BlueiumOre == 0)
                 {
-                    var needyMachines = this.Game.Machines.Where(m => !Rules.CanBeWorked(m)).ToArray();
-
-                    var oreType = AI.REDIUMORE;
-                    if (intern.BlueiumOre > 0)
+                    oreTypes = AI.REDIUMORE.Singular();
+                }
+                else if (intern.BlueiumOre != 0 && intern.RediumOre == 0)
+                {
+                    oreTypes = AI.BLUEIUMORE.Singular();
+                }
+                else
+                {
+                    var needyMachines = this.Game.Machines.Where(m => !Rules.CanBeWorked(m));
+                    var redCount = needyMachines.Count(m => m.OreType == AI.REDIUM);
+                    var blueCount = needyMachines.Count(m => m.OreType == AI.BLUEIUM);
+                    if ((blueCount == 0 && redCount > 0) || (blueCount == 1 && redCount == 3))
                     {
-                        oreType = AI.BLUEIUMORE;
+                        oreTypes = AI.REDIUMORE.Singular();
                     }
-                    else if (intern.RediumOre == 0)
+                    if ((redCount == 0 && blueCount > 0) || (redCount == 1 && blueCount == 3))
                     {
-                        var redCount = needyMachines.Count(m => m.OreType == AI.REDIUM);
-                        if (redCount * 2 > needyMachines.Length)
-                        {
-                            oreType = AI.BLUEIUMORE;
-                        }
-                    }
-                    var machineType = oreType == AI.REDIUMORE ? AI.REDIUM : AI.BLUEIUM;
-
-                    var pickupPoints = this.Game.Tiles.Where(t => t.GetAmount(oreType) > 0 && (t.Machine == null || t.Machine.OreType != machineType)).Select(t => t.ToPoint()).ToHashSet();
-                    var path = Solver.GetPath(intern.ToPoint().Singular(), p => pickupPoints.Contains(p));
-                    if (path != null && path.Count() > 0)
-                    {
-                        foreach (var step in path.Skip(1).SkipLast(1).Take(intern.Moves))
-                        {
-                            intern.Move(step.ToTile());
-                        }
-                        var pickup = path.Last().ToTile();
-                        if (intern.Tile == pickup || intern.Tile.HasNeighbor(pickup))
-                        {
-                            intern.Pickup(pickup, Rules.OpenCapacity(intern), oreType);
-                        }
+                        oreTypes = AI.BLUEIUMORE.Singular();
                     }
                 }
 
+                Solver.MoveAndPickup(intern, AI.GAME.Tiles.Where(t => t.Machine == null), oreTypes);
 
                 if (Rules.OpenCapacity(intern) == 0)
                 {
@@ -191,7 +181,7 @@ namespace Joueur.cs.Games.Newtonian
                         var dropTile = path.Last().ToTile();
                         if (intern.Tile == dropTile || intern.Tile.HasNeighbor(dropTile))
                         {
-                            intern.Drop(dropTile, AI.MANAGER.CarryLimit, dropType);
+                            intern.Drop(dropTile, 0, dropType);
                         }
                     }
                 }

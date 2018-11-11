@@ -97,5 +97,39 @@ namespace Joueur.cs.Games.Newtonian
                 yield return new Point(point.x, point.y + 1);
             }
         }
+
+        public static void MoveAndPickup(Unit unit, IEnumerable<Tile> tiles, IEnumerable<string> oreTypes)
+        {
+            if (unit.OpenCapacity() == 0)
+            {
+                return;
+            }
+
+            var goalPoints = tiles.Where(t => t.GetAmount(oreTypes) > 0).Select(t => t.ToPoint()).ToHashSet();
+
+            if (unit.Moves > 0)
+            {
+                var path = GetPath(unit.ToPoint().Singular(), (p => goalPoints.Contains(p)));
+                if (path.Count() > 2)
+                {
+                    foreach (Point step in path.Skip(1).SkipLast(1).Take(unit.Moves))
+                    {
+                        unit.Move(step.ToTile());
+                    }
+                }
+            }
+
+            var goalsInRange = unit.Tile.GetInRange().Where(t => goalPoints.Contains(t.ToPoint()));
+            foreach (var pickup in goalsInRange)
+            {
+                foreach (var oreType in oreTypes)
+                {
+                    if (pickup.GetAmount(oreType) > 0 && unit.OpenCapacity() > 0)
+                    {
+                        unit.Pickup(pickup, 0, oreType);
+                    }
+                }
+            }
+        }
     }
 }

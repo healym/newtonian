@@ -125,5 +125,40 @@ namespace Joueur.cs.Games.Newtonian
             }
             return 0;
         }
+
+        public static int GetAmount(this Tile tile, IEnumerable<string> oreTypes)
+        {
+            return oreTypes.Sum(o => tile.GetAmount(o));
+        }
+
+        public static int GetAmount(this Unit unit, string oreType)
+        {
+            switch (oreType)
+            {
+                case AI.REDIUM:
+                    return unit.Redium;
+                case AI.REDIUMORE:
+                    return unit.RediumOre;
+                case AI.BLUEIUM:
+                    return unit.Blueium;
+                case AI.BLUEIUMORE:
+                    return unit.BlueiumOre;
+            }
+            return 0;
+        }
+
+        public static int GetAmount(this Unit unit, IEnumerable<string> oreTypes)
+        {
+            return oreTypes.Sum(o => unit.GetAmount(o));
+        }
+
+        public static IEnumerable<Tile> GetInRange(this Tile tile)
+        {
+            yield return tile;
+            foreach (var n in tile.GetNeighbors())
+            {
+                yield return n;
+            }
+        }
     }
 }
