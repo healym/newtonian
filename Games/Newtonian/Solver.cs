@@ -144,5 +144,19 @@ namespace Joueur.cs.Games.Newtonian
                 }
             }
         }
+
+        public static IEnumerable<Point> FindNearest(IEnumerable<Point> starts, IEnumerable<Point> goals)
+        {
+            var goalSet = goals.ToHashSet();
+            var search = new AStar<Point>(starts, p => false, (p1, p2) => 1, p => 0, p =>
+            {
+                if (goalSet.Contains(p) && !p.ToTile().IsPathable())
+                {
+                    return Enumerable.Empty<Point>();
+                }
+                return p.GetNeighboors().Where(n => n.ToTile().IsPathable() || goalSet.Contains(n));
+            });
+            return goals.OrderBy(g => search.GScore[g]);
+        }
     }
 }
