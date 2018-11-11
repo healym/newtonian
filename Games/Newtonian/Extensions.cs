@@ -172,5 +172,15 @@ namespace Joueur.cs.Games.Newtonian
                 yield return n;
             }
         }
+
+        public static IEnumerable<Unit> UsableUnits(this Player player, Job job = null)
+        {
+            return player.Units.Where(u => u != null && u.Tile != null && u.StunTime == 0 && (job == null || u.Job == job));
+        }
+
+        public static IEnumerable<Unit> UsableScorers(this Player player)
+        {
+            return player.Units.Where(u => u != null && u.Tile != null && u.StunTime == 0 && (u.Job == AI.MANAGER || u.Job == AI.PHYSICIST));
+        }
     }
 }

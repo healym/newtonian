@@ -7,14 +7,6 @@ namespace Joueur.cs.Games.Newtonian
 {
     public static class Solver
     {
-        public static IEnumerable<Point> GetPath(IEnumerable<Point> starts, Func<Point, bool> isGoal)
-        {
-            return new AStar<Point>(starts, isGoal, (a, b) => 1, p => 0, p =>
-            {
-                return p.GetNeighbors().Where(n => n.ToTile().IsPathable() || isGoal(n));
-            }).Path;
-        }
-
         public static IEnumerable<Point> GetNeighbors(this Point point)
         {
             if (point.x > 0)
@@ -128,7 +120,7 @@ namespace Joueur.cs.Games.Newtonian
         {
             if (!unit.Acted)
             {
-                foreach(var target in targets.Where(t => t.Owner != unit.Owner && unit.Tile.HasNeighbor(t.Tile)))
+                foreach (var target in targets.Where(t => t.Owner != unit.Owner && unit.Tile.HasNeighbor(t.Tile)))
                 {
                     if (Rules.CanStun(unit.Job, target.Job) && target.StunImmune == 0)
                     {
@@ -180,6 +172,20 @@ namespace Joueur.cs.Games.Newtonian
             }
         }
 
+        public static void Pickup(Unit unit, IEnumerable<string> oreTypes)
+        {
+            foreach (var pickup in unit.Tile.GetInRange())
+            {
+                foreach (var oreType in oreTypes)
+                {
+                    if (pickup.GetAmount(oreType) > 0 && unit.OpenCapacity() > 0)
+                    {
+                        unit.Pickup(pickup, 0, oreType);
+                    }
+                }
+            }
+        }
+
         public static IEnumerable<Point> FindNearest(IEnumerable<Point> starts, IEnumerable<Point> goals)
         {
             var goalSet = goals.ToHashSet();
@@ -194,15 +200,19 @@ namespace Joueur.cs.Games.Newtonian
             return goals.Where(g => search.GScore.ContainsKey(g)).OrderBy(g => search.GScore[g]);
         }
 
+        public static IEnumerable<Point> GetPath(IEnumerable<Point> starts, Func<Point, bool> isGoal)
+        {
+            return new AStar<Point>(starts, isGoal, (a, b) => 1, p => 0, p =>
+            {
+                return p.GetNeighbors().Where(n => n.ToTile().IsPathable() || isGoal(n));
+            }).Path;
+        }
+
         public static IEnumerable<Point> ShortestPath(IEnumerable<Point> starts, IEnumerable<Point> goals)
         {
             var goalSet = goals.ToHashSet();
             return new AStar<Point>(starts, p => goalSet.Contains(p), (p1, p2) => 1, p => 0, p =>
             {
-                if (goalSet.Contains(p) && !p.ToTile().IsPathable())
-                {
-                    return Enumerable.Empty<Point>();
-                }
                 return p.GetNeighbors().Where(n => n.ToTile().IsPathable() || goalSet.Contains(n));
             }).Path;
         }

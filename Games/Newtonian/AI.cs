@@ -118,6 +118,7 @@ namespace Joueur.cs.Games.Newtonian
         {
             LogInventories();
 
+            // Score();
             RunInterns();
             RunPhysicists();
             RunManagers();
@@ -225,7 +226,7 @@ namespace Joueur.cs.Games.Newtonian
 
             List<Unit> allManagers = this.Player.Units.Where(u => u != null && u.Tile != null && u.StunTime == 0 && u.Job == AI.MANAGER).ToList();
             var mules = allManagers.Where(m => m.FullCapacity() == 0).ToList();
-            var orentTiles = this.Game.Tiles.Where(t => t.Redium > 0 || t.Blueium > 0).ToList();
+            var orentTiles = this.Game.Tiles.Where(t => (t.Redium > 0 || t.Blueium > 0) && t.Type != "generator").ToList();
             while (orentTiles.Any())
             {
                 // assign close managers
@@ -417,107 +418,32 @@ namespace Joueur.cs.Games.Newtonian
             AI.GAME.Units.ForEach(u => u.Log(""));
         }
 
-        // <<-- Creer-Merge: methods -->> - Code you add between this comment and the end comment will be preserved between Creer re-runs.
-        // you can add additional methods here for your AI to call
-        private void DisplayMap() {
-            Console.SetCursorPosition(0, 0);
-            Console.BackgroundColor = ConsoleColor.White;
-            Console.Write(new string(' ', this.Game.MapWidth + 2));
-            Console.BackgroundColor = ConsoleColor.Black;
-            Console.WriteLine();
-            for (int y = 0; y < this.Game.MapHeight; y++) {
-                Console.BackgroundColor = ConsoleColor.White;
-                Console.Write(' ');
-                for (int x = 0; x < this.Game.MapWidth; x++) {
-                    Tile t = this.Game.Tiles[y * this.Game.MapWidth + x];
-
-                    // Background color
-                    if (t.Machine != null) {
-                        Console.BackgroundColor = ((t.Machine.OreType == "redium") ? ConsoleColor.DarkRed : ConsoleColor.DarkBlue);
-                    } else if (t.IsWall == true) {
-                        if (t.Decoration == 1 || t.Decoration == 2) {
-                            Console.BackgroundColor = ConsoleColor.DarkGray;  // Black;
-                        } else {
-                            Console.BackgroundColor = ConsoleColor.DarkGray;
-                        }
-                    } else {
-                        if (t.Decoration == 1 || t.Decoration == 2) {
-                            Console.BackgroundColor = ConsoleColor.DarkYellow;
-                        } else {
-                            Console.BackgroundColor = ConsoleColor.Gray;
-                        }
-                    }
-
-                    // Character to display
-                    char foreground = t.Machine == null ? '·' : 'M';
-                    Console.ForegroundColor = ConsoleColor.White;
-
-                    // Tile specific stuff
-                    if (t.Unit != null) {
-                        Console.ForegroundColor = t.Unit.Owner == this.Player ? ConsoleColor.Green : ConsoleColor.Red;
-                        foreground = t.Unit.Job.Title[0] == 'i' ? 'I' : t.Unit.Job.Title[0] == 'm' ? 'M' : 'P'; //t.Unit.ShipHealth > 0 ? 'S' : 'C';
-                    }
-                    if(t.Blueium > 0 || t.Redium > 0) {
-                        Console.BackgroundColor = t.Blueium >= t.Redium ? ConsoleColor.DarkBlue : ConsoleColor.DarkRed;
-                        if(foreground == '·') {
-                            foreground = 'R';
-                        }
-                    }
-                    else if(t.BlueiumOre > 0 || t.RediumOre > 0) {
-                        Console.BackgroundColor = t.BlueiumOre >= t.RediumOre ? ConsoleColor.DarkBlue : ConsoleColor.DarkRed;
-                        if(foreground == '·') {
-                            foreground = 'O';
-                        }
-                    }
-                    else if(t.Owner != null) {
-                        if(t.Type == "spawn") {
-                            Console.BackgroundColor = t.Owner == this.Player ? ConsoleColor.Cyan : ConsoleColor.Magenta;
-                        } else if(t.Type == "generator") {
-                            Console.BackgroundColor = t.Owner == this.Player ? ConsoleColor.DarkCyan : ConsoleColor.DarkMagenta;
-                        }
-                        /*if (false && this.Game.Units.Any(u => u.Path.Contains(t))) {
-                            Console.ForegroundColor = ConsoleColor.Yellow;
-                            foreground = '*';
-                        } else if (t.Decoration) {
-                            Console.ForegroundColor = ConsoleColor.White;
-                            foreground = '.';*/
-                    } else if(t.Type == "conveyor") {
-                        if(t.Direction == "north") {
-                            foreground = '^';
-                        } else if(t.Direction == "east") {
-                            foreground = '>';
-                        } else if(t.Direction == "west") {
-                            foreground = '<';
-                        } else if(t.Direction == "blank") {
-                            foreground = '_';
-                        } else {
-                            foreground = 'V';
-                        }
-                    }
-
-                    Console.Write(foreground);
+        public void Score()
+        {
+            var scoreTypes = new[] { AI.REDIUM, AI.BLUEIUM };
+            var scorers = this.Player.UsableScorers().Where(u => u.OpenCapacity() > 0 && u.Moves > 0).ToList();
+            while (true)
+            {
+                var refinedTiles = this.Game.Tiles.Where(t => (t.Blueium > 0 || t.Redium > 0) && t.Type != "generator");
+                var path = Solver.ShortestPath(refinedTiles.Select(s => s.ToPoint()), scorers.Select(s => s.ToPoint()));
+                if (path.Count() >= 1)
+                {
+                    var tile = path.First().ToTile();
+                    var scorer = path.Last().ToTile().Unit;
+                    Solver.MoveAndPickup(scorer, tile.Singular(), scoreTypes);
+                    scorers.Remove(scorer);
                 }
-
-                Console.BackgroundColor = ConsoleColor.White;
-                Console.Write(' ');
-                Console.BackgroundColor = ConsoleColor.Black;
-                Console.ForegroundColor = ConsoleColor.Gray;
-                Console.Write(y);
-                Console.WriteLine();
+                else
+                {
+                    break;
+                }
             }
 
-            Console.BackgroundColor = ConsoleColor.White;
-            Console.Write(new string(' ', this.Game.MapWidth + 2));
-            Console.BackgroundColor = ConsoleColor.Black;
-            Console.ForegroundColor = ConsoleColor.Gray;
-            Console.WriteLine();
-            // Clear everything past here
-            int left = Console.CursorLeft;
-            int top = Console.CursorTop;
-            Console.Write(new string(' ', Math.Max(Console.WindowHeight, Console.WindowWidth * (Console.WindowHeight - top) - 1)));
-            Console.SetCursorPosition(left, top);
+            foreach (var unit in this.Player.UsableUnits().Where(u => u.Blueium > 0 || u.Redium > 0))
+            {
+                Solver.MoveAndDrop(unit, this.Player.GeneratorTiles, scoreTypes);
+            }
         }
-        // <<-- /Creer-Merge: methods -->>
         #endregion
     }
 }
