@@ -268,7 +268,11 @@ namespace Joueur.cs.Games.Newtonian
         {
             if (m.Tile.GetNeighbors().Any(t => t.Unit != null && t.Unit.Job == AI.PHYSICIST && t.Unit.Acted && t.Unit.Owner == m.Owner))
             {
-                string[] surpriseSayings = { "Keep up the good work!", "Gordan Freeman, and about time, too." };
+                string[] surpriseSayings = { "Keep up the good work!",
+                                    "Gordan Freeman, and about time, too.",
+                                    "We make such a good team",
+                                    "Remember your 360 wellness!",
+                                    "Lotta good synergy in here!"  };
                 int r = RANDOM.Next(surpriseSayings.Count());
                 m.SetLog(surpriseSayings[r]);
             }
