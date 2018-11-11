@@ -120,7 +120,7 @@ namespace Joueur.cs.Games.Newtonian
             {
                 ClearUnitLogs();
             }
-            if (this.Game.CurrentTurn % 50 == 0)
+            if (this.Game.CurrentTurn != 0 && this.Game.CurrentTurn % 50 == 0)
             {
                 LogEnemies();
             }
@@ -134,9 +134,26 @@ namespace Joueur.cs.Games.Newtonian
 
         public void LogEnemies()
         {
-            AI.GAME.Units.Where(u => u.Job == AI.INTERN).ForEach(u => LogIntern(u));
-            AI.GAME.Units.Where(u => u.Job == AI.PHYSICIST).ForEach(u => LogPhysicist(u));
-            AI.GAME.Units.Where(u => u.Job == AI.MANAGER).ForEach(u => LogManager(u));
+            var interns = AI.GAME.Units.Where(u => u.Job == AI.INTERN).ToArray();
+            for (var i = 0; i < RANDOM.Next() % 10; i++)
+            {
+                var randIntern = RANDOM.Next(interns.Count());
+                LogIntern(interns[randIntern]);
+            }
+
+            var phys = AI.GAME.Units.Where(u => u.Job == AI.PHYSICIST).ToArray();
+            for (var i = 0; i < RANDOM.Next() % 10; i++)
+            {
+                var randPhys = RANDOM.Next(interns.Count());
+                LogPhysicist(phys[randPhys]);
+            }
+
+            var mans = AI.GAME.Units.Where(u => u.Job == AI.MANAGER).ToArray();
+            for (var i = 0; i < RANDOM.Next() % 10; i++)
+            {
+                var randMan = RANDOM.Next(mans.Count());
+                LogIntern(mans[randMan]);
+            }
         }
 
         public void LogIntern(Unit u)
@@ -153,7 +170,8 @@ namespace Joueur.cs.Games.Newtonian
         public void LogPhysicist(Unit u)
         {
             string[] physSayings = { "Morning, Mr. Freeman",
-                                     "al;sjhdfa;hd;sakhf;szd" };
+                                     "If the Silver Surfer and Iron Man team up, they'd be Alloys.",
+                                     ""};
             int r = RANDOM.Next(physSayings.Count());
             u.Log(physSayings[r]);
             return;
@@ -165,7 +183,8 @@ namespace Joueur.cs.Games.Newtonian
                                     "pbbbbbbbtttt",
                                     "We make such a good team",
                                     "Remember your 360 wellness!",
-                                    "Investigations hurt science."};
+                                    "Investigations hurt science.",
+                                    "Lotta good synergy in here!" };
             int r = RANDOM.Next(manSayings.Count());
             u.Log(manSayings[r]);
             return;
