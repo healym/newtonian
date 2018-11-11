@@ -75,7 +75,7 @@ namespace Joueur.cs.Games.Newtonian
                     }
                 }
             }
-            unit.Log(unit.FullCapacity().ToString());
+            unit.SetLog(unit.FullCapacity().ToString());
         }
 
         public static void MoveAndDrop(Unit unit, IEnumerable<Tile> tiles, IEnumerable<string> oreTypes)
@@ -100,7 +100,7 @@ namespace Joueur.cs.Games.Newtonian
                     }
                 }
             }
-            unit.Log(unit.FullCapacity().ToString());
+            unit.SetLog(unit.FullCapacity().ToString());
         }
 
         public static void MoveAndAttack(Unit unit, IEnumerable<Unit> targets)

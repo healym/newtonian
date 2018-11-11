@@ -145,12 +145,12 @@ namespace Joueur.cs.Games.Newtonian
                 {
                     intern.Drop(neighborMachine.Tile, -1, AI.BLUEIUMORE);
                 }
-                while (neighborMachine != null && neighborMachine.OreType == AI.REDIUM && intern.Tile.GetAmount(AI.REDIUMORE) > 0 && intern.OpenCapacity() > 0)
+                while (neighborMachine != null && neighborMachine.OreType == AI.REDIUM && intern.Tile.RediumOre > 0 && intern.OpenCapacity() > 0)
                 {
                     intern.Pickup(intern.Tile, -1, AI.REDIUMORE);
                     intern.Drop(neighborMachine.Tile, -1, AI.REDIUMORE);
                 }
-                while (neighborMachine != null && neighborMachine.OreType == AI.BLUEIUM && intern.Tile.GetAmount(AI.BLUEIUMORE) > 0 && intern.OpenCapacity() > 0)
+                while (neighborMachine != null && neighborMachine.OreType == AI.BLUEIUM && intern.Tile.BlueiumOre > 0 && intern.OpenCapacity() > 0)
                 {
                     intern.Pickup(intern.Tile, -1, AI.BLUEIUMORE);
                     intern.Drop(neighborMachine.Tile, -1, AI.BLUEIUMORE);
@@ -187,11 +187,11 @@ namespace Joueur.cs.Games.Newtonian
                     var blueCount = needyMachines.Count(m => m.OreType == AI.BLUEIUM);
                     if ((blueCount == 0 && redCount > 0) || (blueCount == 1 && redCount == 3))
                     {
-                        oreTypes = AI.REDIUMORE.Singular();
+                       oreTypes = AI.REDIUMORE.Singular();
                     }
                     if ((redCount == 0 && blueCount > 0) || (redCount == 1 && blueCount == 3))
                     {
-                        oreTypes = AI.BLUEIUMORE.Singular();
+                       oreTypes = AI.BLUEIUMORE.Singular();
                     }
 
                     //var closestMachine = Solver.FindNearest(this.Player.GeneratorTiles.Select(t => t.ToPoint()), needyMachines.Select(m => m.Tile.ToPoint())).First();
@@ -270,7 +270,7 @@ namespace Joueur.cs.Games.Newtonian
             {
                 string[] surpriseSayings = { "Keep up the good work!", "Gordan Freeman, and about time, too." };
                 int r = RANDOM.Next(surpriseSayings.Count());
-                m.Log(surpriseSayings[r]);
+                m.SetLog(surpriseSayings[r]);
             }
         }
 
@@ -312,9 +312,9 @@ namespace Joueur.cs.Games.Newtonian
                     if (neighbor.IsBlocked() && neighbor.GetAmount(neighbor.OreType) > 0 && physicist.OpenCapacity() > 0)
                     {
                         physicist.Pickup(neighbor.Tile, -1, neighbor.OreType);
-                        physicist.Log(physicist.FullCapacity().ToString());
+                        physicist.SetLog(physicist.FullCapacity().ToString());
                         physicist.Drop(physicist.Tile, -1, neighbor.OreType);
-                        physicist.Log(physicist.FullCapacity().ToString());
+                        physicist.SetLog(physicist.FullCapacity().ToString());
                     }
                 }
             }
@@ -329,22 +329,22 @@ namespace Joueur.cs.Games.Newtonian
                     if (unit.Tile.GetAmount(AI.REDIUM) > 0)
                     {
                         unit.Pickup(unit.Tile, -1, AI.REDIUM);
-                        unit.Log(unit.FullCapacity().ToString());
+                        unit.SetLog(unit.FullCapacity().ToString());
                     }
                     if (unit.Tile.GetAmount(AI.BLUEIUM) > 0)
                     {
                         unit.Pickup(unit.Tile, -1, AI.BLUEIUM);
-                        unit.Log(unit.FullCapacity().ToString());
+                        unit.SetLog(unit.FullCapacity().ToString());
                     }
                     if (unit.Tile.GetAmount(AI.REDIUMORE) > 0)
                     {
                         unit.Pickup(unit.Tile, -1, AI.REDIUMORE);
-                        unit.Log(unit.FullCapacity().ToString());
+                        unit.SetLog(unit.FullCapacity().ToString());
                     }
                     if (unit.Tile.GetAmount(AI.BLUEIUMORE) > 0)
                     {
                         unit.Pickup(unit.Tile, -1, AI.BLUEIUMORE);
-                        unit.Log(unit.FullCapacity().ToString());
+                        unit.SetLog(unit.FullCapacity().ToString());
                     }
                 }
             }
@@ -352,7 +352,7 @@ namespace Joueur.cs.Games.Newtonian
 
         public void LogInventories()
         {
-            AI.PLAYER.Units.ForEach(u => u.Log(u.FullCapacity().ToString()));
+            AI.PLAYER.Units.ForEach(u => u.SetLog(u.FullCapacity().ToString()));
         }
         public void LogEnemies()
         {
@@ -386,7 +386,7 @@ namespace Joueur.cs.Games.Newtonian
                                        "What does '360 wellness' even mean??",
                                        "Do you think anybody's noticed that I haven't figured out Git yet?"};
             int r = RANDOM.Next(internSayings.Count());
-            u.Log(internSayings[r]);
+            u.SetLog(internSayings[r]);
             return;
         }
 
@@ -396,7 +396,7 @@ namespace Joueur.cs.Games.Newtonian
                                      "If the Silver Surfer and Iron Man team up, they'd be Alloys.",
                                      ""};
             int r = RANDOM.Next(physSayings.Count());
-            u.Log(physSayings[r]);
+            u.SetLog(physSayings[r]);
             return;
         }
 
@@ -409,13 +409,13 @@ namespace Joueur.cs.Games.Newtonian
                                     "Investigations hurt science.",
                                     "Lotta good synergy in here!" };
             int r = RANDOM.Next(manSayings.Count());
-            u.Log(manSayings[r]);
+            u.SetLog(manSayings[r]);
             return;
         }
 
         public void ClearUnitLogs()
         {
-            AI.GAME.Units.ForEach(u => u.Log(""));
+            AI.GAME.Units.ForEach(u => u.SetLog(""));
         }
 
         public void Score()

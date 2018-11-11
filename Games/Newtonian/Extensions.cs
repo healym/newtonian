@@ -182,5 +182,12 @@ namespace Joueur.cs.Games.Newtonian
         {
             return player.Units.Where(u => u != null && u.Tile != null && u.StunTime == 0 && (u.Job == AI.MANAGER || u.Job == AI.PHYSICIST));
         }
+        public static void SetLog(this GameObject gameObject, string message)
+        {
+            if (gameObject.Logs.Count == 0 || gameObject.Logs.Last() != message)
+            {
+                gameObject.Log(message);
+            }
+        }
     }
 }
