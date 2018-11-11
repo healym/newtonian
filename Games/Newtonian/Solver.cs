@@ -108,6 +108,7 @@ namespace Joueur.cs.Games.Newtonian
                     }
                 }
             }
+            unit.Log(unit.FullCapacity().ToString());
         }
 
         public static void MoveAndAttack(Unit unit, IEnumerable<Unit> targets)

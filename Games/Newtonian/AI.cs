@@ -253,6 +253,11 @@ namespace Joueur.cs.Games.Newtonian
         {
             foreach (var physicist in this.Player.Units.Where(u => u != null && u.Tile != null && u.StunTime == 0 && u.Job == AI.PHYSICIST))
             {
+                if(physicist.FullCapacity() > 0)
+                {
+                    physicist.Drop(physicist.Tile, -1, AI.REDIUM);
+                    physicist.Drop(physicist.Tile, -1, AI.BLUEIUM);
+                }
                 IEnumerable<Point> targets = AI.GAME.Machines.Where(m => m.CanBeWorked()).Select(m => m.ToPoint());
                 if (!targets.Any())
                 {
@@ -271,7 +276,9 @@ namespace Joueur.cs.Games.Newtonian
                     if (neighbor.IsBlocked() && neighbor.GetAmount(neighbor.OreType) > 0 && physicist.OpenCapacity() > 0)
                     {
                         physicist.Pickup(neighbor.Tile, -1, neighbor.OreType);
+                        physicist.Log(physicist.FullCapacity().ToString());
                         physicist.Drop(physicist.Tile, -1, neighbor.OreType);
+                        physicist.Log(physicist.FullCapacity().ToString());
                     }
                 }
             }
@@ -286,18 +293,22 @@ namespace Joueur.cs.Games.Newtonian
                     if (unit.GetAmount(AI.REDIUM) > 0)
                     {
                         unit.Pickup(unit.Tile, -1, AI.REDIUM);
+                        unit.Log(unit.FullCapacity().ToString());
                     }
                     if (unit.GetAmount(AI.BLUEIUM) > 0)
                     {
                         unit.Pickup(unit.Tile, -1, AI.BLUEIUM);
+                        unit.Log(unit.FullCapacity().ToString());
                     }
                     if (unit.GetAmount(AI.REDIUMORE) > 0)
                     {
                         unit.Pickup(unit.Tile, -1, AI.REDIUMORE);
+                        unit.Log(unit.FullCapacity().ToString());
                     }
                     if (unit.GetAmount(AI.BLUEIUMORE) > 0)
                     {
                         unit.Pickup(unit.Tile, -1, AI.BLUEIUMORE);
+                        unit.Log(unit.FullCapacity().ToString());
                     }
                 }
             }
