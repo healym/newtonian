@@ -119,7 +119,7 @@ namespace Joueur.cs.Games.Newtonian
 
         public static void MoveAndAttack(Unit unit, IEnumerable<Unit> targets)
         {
-            Move(unit, targets.Select(t => t.Tile.ToPoint()).ToHashSet());
+            Move(unit, targets.Where(t => t != null).Select(t => t.Tile.ToPoint()).ToHashSet());
             var enemy = unit.Tile.GetNeighbors().FirstOrDefault(t => t.Unit != null && t.Unit.Owner != unit.Owner);
             if (enemy != null)
             {
