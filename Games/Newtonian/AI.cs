@@ -266,7 +266,9 @@ namespace Joueur.cs.Games.Newtonian
         {
             if (m.Tile.GetNeighbors().Any(t => t.Unit != null && t.Unit.Job == AI.PHYSICIST && t.Unit.Acted && t.Unit.Owner == m.Owner))
             {
-                m.Log("Keep up the good work!");
+                string[] surpriseSayings = { "Keep up the good work!", "Gordan Freeman, and about time, too." };
+                int r = RANDOM.Next(surpriseSayings.Count());
+                m.Log(surpriseSayings[r]);
             }
         }
 
