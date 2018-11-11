@@ -41,6 +41,9 @@ namespace Joueur.cs.Games.Newtonian
         public const string REDIUMORE = "redium ore";
         public const string BLUEIUMORE = "blueium ore";
         public static Random RANDOM = new Random();
+
+        public static Machine CLOSEST_REDIUM;
+        public static Machine CLOSEST_BLUEIUM;
         // <<-- /Creer-Merge: properties -->>
         #endregion
 
@@ -75,6 +78,9 @@ namespace Joueur.cs.Games.Newtonian
             AI.INTERN = this.Game.Jobs.First(j => j.Title == "intern");
             AI.MANAGER = this.Game.Jobs.First(j => j.Title == "manager");
             AI.PHYSICIST = this.Game.Jobs.First(j => j.Title == "physicist");
+
+            AI.CLOSEST_REDIUM = Solver.FindNearest(this.Player.SpawnTiles.Select(t => t.ToPoint()), this.Game.Machines.Where(m => m.OreType == AI.REDIUM).Select(m => m.ToPoint())).First().ToTile().Machine;
+            AI.CLOSEST_BLUEIUM = Solver.FindNearest(this.Player.SpawnTiles.Select(t => t.ToPoint()), this.Game.Machines.Where(m => m.OreType == AI.BLUEIUM).Select(m => m.ToPoint())).First().ToTile().Machine;
             // <<-- /Creer-Merge: start -->>
         }
 
@@ -187,11 +193,11 @@ namespace Joueur.cs.Games.Newtonian
                     var blueCount = needyMachines.Count(m => m.OreType == AI.BLUEIUM);
                     if ((blueCount == 0 && redCount > 0) || (blueCount == 1 && redCount == 3))
                     {
-                       oreTypes = AI.REDIUMORE.Singular();
+                        oreTypes = AI.REDIUMORE.Singular();
                     }
                     if ((redCount == 0 && blueCount > 0) || (redCount == 1 && blueCount == 3))
                     {
-                       oreTypes = AI.BLUEIUMORE.Singular();
+                        oreTypes = AI.BLUEIUMORE.Singular();
                     }
 
                     //var closestMachine = Solver.FindNearest(this.Player.GeneratorTiles.Select(t => t.ToPoint()), needyMachines.Select(m => m.Tile.ToPoint())).First();
@@ -211,7 +217,15 @@ namespace Joueur.cs.Games.Newtonian
                     {
                         machines = AI.GAME.Machines.Where(m => m.OreType == machineType);
                     }
-                    Solver.MoveAndDrop(intern, AI.GAME.Machines.Where(m => m.OreType == machineType).Select(m => m.Tile), dropType.Singular());
+                    if (machines.Contains(AI.CLOSEST_REDIUM))
+                    {
+                        machines = AI.CLOSEST_REDIUM.Singular();
+                    }
+                    else if (machines.Contains(AI.CLOSEST_BLUEIUM))
+                    {
+                        machines = AI.CLOSEST_BLUEIUM.Singular();
+                    }
+                    Solver.MoveAndDrop(intern, machines.Select(m => m.Tile), dropType.Singular());
                     Solver.MoveAndDrop(intern, AI.PLAYER.Units.Where(u => {
                         var n = u.NeighborMachines().FirstOrDefault();
                         return n != null && n.OreType == machineType && (u.Job == AI.INTERN || u.Job == AI.PHYSICIST);
