@@ -210,11 +210,11 @@ namespace Joueur.cs.Games.Newtonian
                 var victoryTypes = new List<string>();
                 if ((this.Player.Pressure * (this.Player.Heat + AI.MANAGER.CarryLimit * AI.GAME.RefinedValue)) > this.Game.VictoryAmount)
                 {
-                    victoryTypes.Add(AI.REDIUM);
+                    victoryTypes.Add(AI.REDIUMORE);
                 }
                 if ((this.Player.Heat * (this.Player.Pressure + AI.MANAGER.CarryLimit * AI.GAME.RefinedValue)) > this.Game.VictoryAmount)
                 {
-                    victoryTypes.Add(AI.BLUEIUM);
+                    victoryTypes.Add(AI.BLUEIUMORE);
                 }
 
                 if (victoryTypes.Count > 0)
