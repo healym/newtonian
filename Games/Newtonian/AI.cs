@@ -116,10 +116,7 @@ namespace Joueur.cs.Games.Newtonian
         public bool RunTurn()
         {
             RunInterns();
-            foreach (var manager in this.Player.Units.Where(u => u != null && u.Tile != null && u.Job == AI.MANAGER))
-            {
-                Solver.RunManager(manager);
-            }
+            Solver.RunManagers();
             foreach (var physicist in this.Player.Units.Where(u => u != null && u.Tile != null && u.Job == AI.PHYSICIST))
             {
                 Solver.RunPhysicist(physicist, this.Game.Machines);

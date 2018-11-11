@@ -9,7 +9,7 @@ namespace Joueur.cs.Games.Newtonian
     {
         public static void RunPhysicist(Unit unit, IEnumerable<Machine> machines)
         {
-            var goals = machines.Where(m => Rules.CanBeWorked(m)).Select(m => m.ToPoint()).ToHashSet();
+            var goals = machines.Where(m => Rules.CanBeWorked(m) && m.Tile.GetNeighbors().All(t => t.Unit == null || t.Unit.Job != AI.PHYSICIST || t.Unit.Owner != AI.PLAYER)).Select(m => m.ToPoint()).ToHashSet();
             var path = GetPath(unit.ToPoint().Singular(), p => goals.Contains(p)).ToArray();
             if (path != null && path.Length > 2)
             {
@@ -27,45 +27,19 @@ namespace Joueur.cs.Games.Newtonian
             }
         }
 
-        public static void RunManager(Unit u)
+        public static void RunManagers()
         {
-            var goalType = AI.REDIUM;
-            if (Rules.OpenCapacity(u) > 0)
+            foreach (var u in this.Player.Units.Where(u => u != null && u.Tile != null && u.Job == AI.MANAGER))
             {
-                var goalTiles = AI.GAME.Tiles.Where(t => t.GetAmount(goalType) > 0).Select(t => t.ToPoint()).ToHashSet();
-                var path = GetPath(u.ToPoint().Singular(), (p => goalTiles.Contains(p)));
-                if (path != null && path.Count() > 0)
+                var goalTypes = new [] { AI.REDIUM, AI.BLUEIUM };
+                if (Rules.OpenCapacity(u) > 0)
                 {
-                    foreach (Point step in path.Skip(1).SkipLast(1).Take(u.Moves))
-                    {
-                        u.Move(step.ToTile());
-                    }
-                    var pickup = path.Last().ToTile();
-                    if (u.Tile == pickup || u.Tile.HasNeighbor(pickup))
-                    {
-                        u.Pickup(pickup, 0, goalType);
-                    }
+                    MoveAndPickup(u, AI.GAME.Tiles, goalTypes);
                 }
-                
-            }
 
-            if (Rules.OpenCapacity(u) == 0)
-            {
-                var goalTiles = u.Owner.GeneratorTiles.Select(t => t.ToPoint()).ToHashSet();
-                var path = GetPath(u.ToPoint().Singular(), (p => goalTiles.Contains(p)));
-
-                if (path != null && path.Count() > 0)
+                if (Rules.OpenCapacity(u) == 0)
                 {
-                    foreach (Point step in path.Skip(1).SkipLast(1).Take(u.Moves))
-                    {
-                        u.Move(step.ToTile());
-                    }
-                    var jenny = path.Last().ToTile();
-                    if (u.Tile == jenny || u.Tile.HasNeighbor(jenny))
-                    {
-                        u.Drop(jenny, AI.MANAGER.CarryLimit, AI.REDIUM);
-                        u.Drop(jenny, AI.MANAGER.CarryLimit, AI.BLUEIUM);
-                    }
+                   MoveAndDrop(u, AI.GAME.Tiles.Where(t => t.Type == "generator"), goalTypes);
                 }
             }
         }
