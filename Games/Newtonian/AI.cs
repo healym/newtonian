@@ -142,22 +142,24 @@ namespace Joueur.cs.Games.Newtonian
                 else
                 {
                     var needyMachines = this.Game.Machines.Where(m => !Rules.CanBeWorked(m));
-                    var redCount = needyMachines.Count(m => m.OreType == AI.REDIUM);
-                    var blueCount = needyMachines.Count(m => m.OreType == AI.BLUEIUM);
-                    if ((blueCount == 0 && redCount > 0) || (blueCount == 1 && redCount == 3))
-                    {
-                        oreTypes = AI.REDIUMORE.Singular();
-                    }
-                    if ((redCount == 0 && blueCount > 0) || (redCount == 1 && blueCount == 3))
-                    {
-                        oreTypes = AI.BLUEIUMORE.Singular();
-                    }
-                }
+                    //var redCount = needyMachines.Count(m => m.OreType == AI.REDIUM);
+                    //var blueCount = needyMachines.Count(m => m.OreType == AI.BLUEIUM);
+                    //if ((blueCount == 0 && redCount > 0) || (blueCount == 1 && redCount == 3))
+                    //{
+                    //    oreTypes = AI.REDIUMORE.Singular();
+                    //}
+                    //if ((redCount == 0 && blueCount > 0) || (redCount == 1 && blueCount == 3))
+                    //{
+                    //    oreTypes = AI.BLUEIUMORE.Singular();
+                    //}
 
-                Solver.MoveAndPickup(intern, AI.GAME.Tiles.Where(t => t.Machine == null), oreTypes);
-                Solver.MoveAndPickup(intern, AI.GAME.Tiles.Where(t => t.Machine == null), oreTypes);
-                Solver.MoveAndPickup(intern, AI.GAME.Tiles.Where(t => t.Machine == null), oreTypes);
-                Solver.MoveAndPickup(intern, AI.GAME.Tiles.Where(t => t.Machine == null), oreTypes);
+                    var closestMachine = Solver.FindNearest(this.Player.GeneratorTiles.Select(t => t.ToPoint()), needyMachines.Select(m => m.Tile.ToPoint())).First();
+                    oreTypes = closestMachine.ToTile().Machine.OreType == AI.REDIUM ? AI.REDIUMORE.Singular() : AI.BLUEIUMORE.Singular();
+                }
+                for (var i = 0; i < 4; i++)
+                {
+                    Solver.MoveAndPickup(intern, AI.GAME.Tiles.Where(t => t.Machine == null), oreTypes);
+                }
 
                 if (intern.GetAmount(oreTypes) > 0)
                 {

@@ -120,7 +120,7 @@ namespace Joueur.cs.Games.Newtonian
         public static void MoveAndAttack(Unit unit, IEnumerable<Unit> targets)
         {
             Move(unit, targets.Where(t => t.Tile != null).Select(t => t.Tile.ToPoint()).ToHashSet());
-            var enemy = unit.Tile.GetNeighbors().FirstOrDefault(t => t.Unit != null && t.Unit.Owner != unit.Owner);
+            var enemy = unit.Tile.GetNeighbors().FirstOrDefault(t => t.Unit != null);
             if (enemy != null)
             {
                 unit.Attack(enemy);
@@ -154,9 +154,9 @@ namespace Joueur.cs.Games.Newtonian
                 {
                     return Enumerable.Empty<Point>();
                 }
-                return p.GetNeighboors().Where(n => n.ToTile().IsPathable() || goalSet.Contains(n));
+                return p.GetNeighboors().Where(n => n.ToTile().IsPathable() || n.ToTile().Unit != null || goalSet.Contains(n));
             });
-            return goals.OrderBy(g => search.GScore[g]);
+            return goals.Where(g => search.GScore.ContainsKey(g)).OrderBy(g => search.GScore[g]);
         }
     }
 }
