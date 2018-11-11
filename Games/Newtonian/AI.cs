@@ -52,7 +52,7 @@ namespace Joueur.cs.Games.Newtonian
         public override string GetName()
         {
             // <<-- Creer-Merge: get-name -->> - Code you add between this comment and the end comment will be preserved between Creer re-runs.
-            return "Newtonian C# Player"; // REPLACE THIS WITH YOUR TEAM NAME!
+            return "Onyx Plateau"; // REPLACE THIS WITH YOUR TEAM NAME!
             // <<-- /Creer-Merge: get-name -->>
         }
 
